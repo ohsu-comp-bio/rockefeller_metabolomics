@@ -1,3 +1,15 @@
+"""
+Functions for
+    (1) retrieving metabolites from a matrix of assay results,
+    (2) selecting significantly altered metabolites
+    (3) mapping metabolite names to their ChEBI IDs
+
+
+Author: Hannah Manning <manningh@ohsu.edu>
+Date: August 8, 2017
+"""
+
+
 import libchebipy as lc
 import pandas as pd
 
@@ -5,6 +17,11 @@ import pandas as pd
 def get_metabolites(assay_file):
     """
     Gets list of metabolites from assay_results.tsv.
+
+    assay_results.tsv:
+        -matrix with cell lines as cols and metabolites as row names
+        -final column is the p-value resulting from a t-test between
+            sensitive and resistant cell lines
     """
 
     # i.e. 'assay_results.tsv'

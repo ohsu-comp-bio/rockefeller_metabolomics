@@ -1,3 +1,13 @@
+"""
+Functions for
+    (1) verifying that exact matches (provided name to a CheBI ID) map back
+        to the unfiltered, single edge-type .sif.
+    (2) extracting all members of a .sif
+
+Author: Hannah Manning <manningh@ohsu.edu>
+Date: August 8, 2017
+"""
+
 def verify_exact_chebis(sif_file):
     """
     Checks whether exact CHEBI ID matches appear in the used-to-produce sif.

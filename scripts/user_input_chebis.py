@@ -1,3 +1,8 @@
+"""
+Function for integrating user input in the generation of .sifs.
+"""
+
+
 import os
 
 def ask_user_for_chebis(misfit_loc, signif_no_match_loc):
