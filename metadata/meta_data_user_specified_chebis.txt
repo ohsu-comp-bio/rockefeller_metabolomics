@@ -1,0 +1,141 @@
+# meta data for user_specified_chebis.txt
+# black magic: if the exact chebi ID match doesn't appear in chebi on browser, replace the chebi ID in this address:
+# http://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:132958
+# SIGNIFICANT indicates that the abundance of this small molecule changed significantly according to the assay_results.txt ttest.
+#
+# Significant small molecules that are excluded from network:
+#	Na_acetylglutamine (alias N-alpha-acetylglutamine (urinary metabolite)) has no exact ChEBI matches.
+#	Na_acetylglutamine aliases and similar structures do not appear in used-to-produce.sif (73685, 21553)
+#	UDP-hexose had no exact matches and no aliases or similar structures in ChEBI
+#
+# Insignificant small molecules that are excluded from network:
+#   hydroxyproline
+#   betaine (vague classification)
+#   Ne-acetyllysine
+#   C5_carnitines
+#	F6P_G1P (fructose-6-phosphate and glucose-1-phosphate...bound? both? ?)
+#	N-acetylglutamate (see carglumic acid?)
+#   fructose_1,6-bisphosphate (D-fructose 1,6-bisphosphate 78682 is closest match and doesn't appear in sif
+#   urate (difficulty in determining if we should include urate radical (89161)
+#   ribose_ribulose_5-phosphate (does this mean either of ribose 5-phosphate or ribulose 5-phosphate?)
+#   acetylserine (45441, 17981, 58340 don't appear in used-to-produce.sif)
+
+ADDED_CHEBI_ID    METAB_OF_INTEREST  ADDED_ID_NAME SIGNIFICANT    DETAILS
+CHEBI:29990	aspartate	D-aspartate(1-)	YES	Exact aspartate match (132943) doesn't appear in used-to-produce.sif. Nor do aspartate(1-) or L- or D- aspartate(2-) ions (35391,29993,29994).
+CHEBI:29991	aspartate	L-aspartate(2-)	YES	Exact aspartate match (132943) doesn't appear in used-to-produce.sif. Nor do aspartate(1-) or L- or D- aspartate(2-) ions (35391,29993,29994).
+CHEBI:29995	aspartate	aspartate(2-)	YES	Exact aspartate match (132943) doesn't appear in used-to-produce.sif. Nor do aspartate(1-) or L- or D- aspartate(2-) ions (35391,29993,29994).
+CHEBI:6650	malate	malic acid	YES	Exact malate match (25115) doesn't appear in used-to-produce.sif. Nor does malate(2-) ion (15595). Malate(1-) does not appear in ChEBI).
+CHEBI:21557	N-acetylmethionine	N-acetyl-L-methionine	YES Exact N-acetylmethionine match (132958) doesn't appear in used-to-produce.sif. Nor does D- isomer (85210) or it's 1- ion (85220).
+CHEBI:16947	citrate	citrate(3-)	YES	No exact ChEBI match found for citrate. Other ions do not appear in used-to-produce.sif (1- ion: 35804; 2- ion: 35808).
+CHEBI:16383	cis-aconitate	cis-aconitate(3-)	YES	No exact ChEBI match found for cis-aconitate. Nor for cis-aconitate(1-) or (2-) ions.
+CHEBI:16863	6-phosphogluconate	6-phospho-D-gluconate	YES	No exact ChEBI match found for 6-phosphogluconate. Nor fofr 6-phospho-L-gluconate.
+CHEBI:37154	fumarate	fumarate(1-)	YES	No exact ChEBI match found for fumarate.
+CHEBI:29806	fumarate	fumarate(2-)	YES	No exact ChEBI match found for fumarate.
+CHEBI:16680	S-adenosylhomocysteine	S-adenosyl-L-homocysteine	YES	No exact ChEBI match found for S-adenosylhomocysteine. Nor for D- isomer.
+CHEBI:14314	glucose_6-phosphate	D-glucose 6-phosphate	YES	No exact ChEBI match found for glucose_6-phosphate.
+CHEBI:17719	glucose_6-phosphate	B-D-glucose 6-phosphate	YES	No exact ChEBI match found for glucose_6-phosphate.
+CHEBI:58247	glucose_6-phosphate	B-D-glucose 6-phosphate(2-)	YES No exact ChEBI match found for glucose_6-phosphate.
+CHEBI:58225	glucose_6-phosphate	a-D-glucose 6-phosphate	YES	No exact ChEBI match found for glucose_6-phosphate.
+CHEBI:62501	folate	folate(2-)	YES	No exact ChEBI match found for folate or other ions.
+CHEBI:57472	arginosuccinate	(N(omega)-L-argino)succinate(1-)	YES	No exact ChEBI match found for arginosuccinate.
+CHEBI:18019	lysine	L-lysine	NO	Exact lysine match (25094) doesn't appear in used-to-produce.sif. Nor does D- isomer (18655).
+CHEBI:17191	isoleucine	L-isoleucine	NO	Exact isoleucine match (24898) doesn't appear in used-to-produce.sif. Nor does D- isomer (27730)
+CHEBI:57742	guanidinoacetate	guanidinoacetic acid zwitterion		NO	Exact guanidinoacetate match (131444) doesn't appear in used-to-produce.sif.
+CHEBI:16344	guanidinoacetate	guanidinoacetic acid	NO	Exact guanidinoacetate match (13144) doesn't appear in used-to-produce.sif
+CHEBI:11596	2-hydroxyglutarate	2-hydroxyglutarate(2-)	NO	Exact 2-hydroxyglutarate match (132941) doesn't appear in used-to-produce.sif. Nor does 1- ion (36149).
+CHEBI:16349	citrulline	L-citrulline	NO	Exact citrulline match (18211) doesn't appear in used-to-produce.sif. Nor does D- isomer (49007).
+CHEBI:17295	phenylalanine	L-phenylalanine	NO	Exact phenylalanine match (28044) doesn't appear in used-to-produce.sif. Nor does D- isomer (16998).
+CHEBI:16313	proline	D-proline	NO	Exact proline match (26271) doesn't appear in used-to-produce.sif.
+CHEBI:17203	proline	L-proline	NO	Exact proline match (26271) doesn't appear in used-to-produce.sif.
+CHEBI:16828	tryptophan	L-tryptophan	NO	Exact tryptophan match (27897) doesn't appear in used-to-produce.sif. Nor does D- isomer (16296).
+CHEBI:16414	valine	L-valine	NO	Exact valine match (27266) doesn't appear in used-to-produce.sif. Nor does D- isomer (27477).
+CHEBI:15971	histidine	L-histidine	NO	Exact histidine match (27570) doesn't appear in used-to-produce.sif. Nor does D- isomer (27947).
+CHEBI:10983	3-hydroxybutyrate	(R)-3-hydroxybutyrate	NO	Exact 3-hydroxybutyrate match (37054) doesn't appear in used-to-produce.sif.
+CHEBI:11047	3-hydroxybutyrate	(S)-3-hydroxybutyrate	NO	Exact 3-hydroxybutyrate match (37054) doesn't appear in used-to-produce.sif.
+CHEBI:16643	methionine	L-methionine	NO	Exact methionine match (16711) doesn't appear in used-to-produce.sif. Nor does D- isomer (16867).
+CHEBI:17553	phosphoethanolamine	O-phosphoethanolamine	NO	Exact phosphoethanolamine match (36711) doesn't appear in used-to-produce.sif.
+CHEBI:17050	3-phosphoglycerate	3-phosphoglyceric acid	NO	Exact 3-phosphoglycerate match (132960) doesn't appear in used-to-produce.sif.
+CHEBI:17794	3-phosphoglycerate	3-phospho-D-glyceric acid	NO	Exact 3-phosphoglycerate match (132960) doesn't appear in used-to-produce.sif.
+CHEBI:16857	threonine	L-threonine	NO	Exact threonine match (26986) doesn't appear in used-to-produce.sif. Nor does D- isomer (16398)
+CHEBI:30031	succinate	succinate(2-)	NO	Exact succinate match (26806) doesn't appear in used-to-produce.sif. Nor does 1- ion (30779).
+CHEBI:16946	kynurenine	L-kynurenine	NO	Exact kynurenine match (28683) doesn't appear in used-to-produce.sif. Nor does D- isomer (86262).
+CHEBI:57959	kynurenine	L-kynurenine zwitterion	NO	Exact kynurenine match (28683) doesn't appear in used-to-produce.sif. Nor does D- isomer (86262).
+CHEBI:7916	pantothenic_acid	pantothenic acid	NO	Underscore in name prevented exact match.
+CHEBI:46905	pantothenic_acid	(R)-pantothenic acid	NO	R enantiomer.
+CHEBI:15414	S-adenosylmethionine	S-adenosyl-L-methionine	NO	No exact match found for S-adenosylmethionine or D- isomer.
+CHEBI:67040	S-adenosylmethionine	S-adenosyl-L-methionate	NO	No exact match found for S-adenosylmethionine or D- isomer..
+CHEBI:16264	UDP-GlcNAc	UDP-N-acetyl-a-D-glucosamine	NO	No exact match found for UDP-GlcNAc.
+CHEBI:57705	UDP-GlcNAc	UDP-N-acetyl-a-D-glucosamine(2-)	NO	No exact match found for UDP-GlcNAc.
+CHEBI:17082	2-aminoadipate	L-2-aminoadipate(2-)	NO	No exact match found for 2-aminoadipate or D- isomer.
+CHEBI:58672	2-aminoadipate	L-2-aminoadipate(1-)	NO	No exact match found for 2-aminoadipate or D- isomer.
+CHEBI:16810	alpha-ketoglutarate	2-oxoglutarate(2-)	NO	No exact match found for alpha-ketoglutarate. 2-oxoglutarate is a verified synonym with identical structure. 1- ion doesn't appear in sif (30916).
+CHEBI:17720	2,3-BPG	2,3-bisphospho-D-glyceric acid	NO	No exact match found for 2,3-BPG. 2,3-bisphosphoglyceric acid (28907) doesn't appear in used-to-produce.sif.
+CHEBI:19324	2,3-BPG	2,3-bisphosphoglycerate	NO	No exact match found for 2,3-BPG. 2,3-bisphosphoglyceric acid (28907) doesn't appear in used-to-produce.sif.
+CHEBI:17240	itaconic_acid	itaconate(2-)	NO	Itaconic acid (30838) doesn't appear in used-to-produce.sif.
+CHEBI:15978	glycerol_3-phosphate	sn-glycerol 3-phosphate	NO	No exact match for glycerol_3-phosphate. This is a synonym for glycerol-3-phosphate which is the R enantiomer of glycerol-1-phosphate.
+CHEBI:57597	glycerol_3-phosphate	sn-glycerol 3-phosphate(2-)	NO	No exact match for glycerol_3-phosphate.
+CHEBI:16856	GSH	glutathione	NO	No exact match for GSH. This is a synonym.
+CHEBI:57925	GSH	glutathionate(1-)	NO	No exact match for GSH.
+CHEBI:7676	butyryl_carnitine	O-butanoylcarnitine	NO	No exact match for butyryl_carnitine. O-butanoylcarnitine is a synonym. O-butanoyl-L-carnitine (21949) doesn't appear in used-to-produce.sif.
+CHEBI:16108	dihydroxyacetone_phosphate	dihydroxyacetone phosphate	NO	No exact match for dihydroxyacetone_phosphate.
+CHEBI:29987	glutamate	glutamate(2-)	NO	No exact match for glutamate. 1- ion doesn't appear in used-to-produce.sif.
+CHEBI:29985	glutamate	L-glutamate(2-)	NO	No exact match for glutamate. D- isomer doesn't appear in used-to-produce.sif
+CHEBI:15721	sedoheptulose_7-phosphate	sedoheptulose 7-phosphate	NO	No exact match for sedoheptulose_7-phosphate.
+CHEBI:57483	sedoheptulose_7-phosphate	sedoheptulose 7-phosphate(2-)	NO	No exact match for sedoheptulose_7-phosphate.
+CHEBI:7896	palmitate	hexadecanoate	NO	No exact match for palmitate. This is a synonym and the structure looks right. Hexadecanoic acid is a synonym for palmitic acid.
+CHEBI:15756	palmitate	hexadecanoic acid	NO	No exact match found for palmitate. Palmitate is a general term for salts and esters of palmitic acid. Hexadecanoic acid is a synonym for palmitic acid.
+CHEBI:28867	propionylcarnitine	O-propanoylcarnitine	NO	No exact match found for propionylcarnitine. This is a synonym.
+CHEBI:53210	propionylcarnitine	O-propanoyl-L-carnitine	NO	No exact match found for propionylcarnitine.
+CHEBI:17509	methylthioadenosine	5'-S-methyl-5'-thioadenosine	NO	No exact match found for methylthioadenosine.
+CHEBI:15940	nicotinic_acid	nicotinic acid	NO	No exact match for nicotinic_acid.
+CHEBI:32544	nicotinic_acid	nicotinate	NO	No exact match for nicotinic_acid.
+CHEBI:17287	phosphocreatine	N-phosphocreatine	NO	No exact match for phosphocreatine.
+CHEBI:58092	phosphocreatine	N-phosphocreatine(2-)	NO	No exact match for phosphocreatine.
+CHEBI:57589	acetylcarnitine	O-acetyl-L-carnitine	NO	No exact match for acetylcarnitine. D- isomer (86045) doesn't appear in used-to-produce.sif.
+CHEBI:17138	glyceraldehyde_3-phosphate	glyceraldehyde 3-phosphate	NO	No match for glyceraldehyde_3-phosphate.
+CHEBI:58027	glyceraldehyde_3-phosphate	glyceraldehyde 3-phosphate(2-)	NO	No match for glyceraldehyde_3-phosphate.
+CHEBI:59776	glyceraldehyde_3-phosphate	D-glyceraldehyde 3-phosphate(2-)	NO	No match for glyceraldehyde_3-phosphate.
+CHEBI:17858	GSSG	glutathione disulfide	NO	No match for GSSG. This is its extended name.
+CHEBI:15678	allantoin	(S)-(+)-allantoin	NO	Isomer of allantoin (15676). (R)-(-)-allantoin isomer (15677) doesn't appear in used-to-produce.sif.
+CHEBI:246422	dUMP	dUMP(2-)	NO	Conjugate base of dUMP (17622).
+CHEBI:58223	UDP	UDP(3-)	NO	Conjugate base of UDP (17659).
+CHEBI:57288	acetyl-CoA	acetyl-CoA(4-)	NO	Conjugate base of acetyl-CoA (15351).
+CHEBI:58069	CDP	CDP(3-)	NO	Conjugate base of CDP (17239).
+CHEBI:456216	ADP	ADP(3-)	NO	Conjugate base of ADP (16761). ADP(2-) (87518) doesn't appear in used-to-produce.sif.
+CHEBI:46398	UTP	UTP(4-)	NO	Conjugate base of UTP (15713). UTP(3-) (57481) doesn't appear in used-to-produce.sif.
+CHEBI:16004	lactate	(R)-lactate	NO	Isomer of lactate (24996).
+CHEBI:16651	lactate (S)-lactate	NO	Isomer of lactate (24996).
+CHEBI:78320	lactate	2-hydroxypropanoic acid	NO	Conjugate acid of lactate
+CHEBI:28358	lactate	rac-lactic acid	NO	Racemic mixture of 50/50 R- and S- lactic acid isomers.
+CHEBI:32816	pyruvate	pyruvic acid	NO	Conjugate acid of pyruvate (15361).
+CHEBI:37568	dTTP	dTTP(4-)	NO	Conjugate base of dTTP (18077). dTTP(3-) (58370) doesn't appear in used-to-produce.sif.
+CHEBI:37563	CTP	CTP(4-)	NO	Conjugate base of CTP (17677). CTP(3-) (58231) doesn't appear in used-to-produce.sif.
+CHEBI:60377	CMP	CMP(2-)	NO	Conjugate base of CMP (17361).
+CHEBI:16176	ornithine	D-ornithine	NO	Isomer of ornithine (18257).
+CHEBI:15729	ornithine	L-ornithine	NO	Isomer of ornithine (18257).
+CHEBI:57865	UMP	UMP(2-)	NO	Conjugate base of UMP (16695).
+CHEBI:456215	AMP	AMP(2-)	NO	Conjugate base of AMP (16027). AMP(1+) (40721) doesn't appear in used-to-produce.sif.
+CHEBI:58115	GMP	GMP(2-)	NO	Conjugate base of GMP (17345).
+CHEBI:57853	hypotaurine	hypotaurine zwitterion	NO	Tautomer of hypotaurine (16668).
+CHEBI:16742	orotate	orotic acid	NO	Conjugate acid of orotate (30839).
+CHEBI:17482	cystathionine	L-cystathionine	NO	Isomer of cystathionine (17755).
+CHEBI:58053	IMP	IMP(2-)	NO	Conjugate base of IMP (17202).
+CHEBI:17634	glucose	D-glucose	NO	Isomer of glucose (17234). L-isomer (37624) doesn't appear in used-to-produce.sif.
+CHEBI:57305	glycine	glycine zwitterion	NO	Tautomer of glycine (15428).
+CHEBI:15570	alanine	D-alanine	NO	Isomer of alanine (16449).
+CHEBI:16977	alanine	L-alanine	NO	Isomer of alanine (16449).
+CHEBI:18050	glutamine	L-glutamine	NO	Isomer of glutamine (28300). D-isomer (17061) doesn't appear in used-to-produce.sif.
+CHEBI:17895	tyrosine	L-tyrosine	NO	Isomer of tyrosine (18186). D-isomer (28479) doesn't appear in used-to-produce.sif.
+CHEBI:17196	asparagine	L-asparagine	NO	Isomer of asparagine (22653). D-isomer (28159) doesn't appear in used-to-produce.sif.
+CHEBI:3424	carnitine	carnitinium	NO	Conjugate acid of carnitine (17126).
+CHEBI:16347	carnitine	(R)-carnitine	NO	Isomer of carnitine (17126).
+CHEBI:11060	carnitine	(S)-carnitine	NO	Isomer of carnitine (17126).
+CHEBI:295975	phosphocholine	choline phosphate(1-)	NO	Conjugate base of phosphocholine (18132).
+CHEBI:57996	beta-alanine	beta-alanine zwitterion	NO	Tautomer of beta-alanine (16958).
+CHEBI:57947	creatine	creatine zwitterion	NO	Tautomer of creatine (16919).
+CHEBI:507393	taurine	taurine zwitterion	NO	Tautomer of taurine (15891).
+CHEBI:16523	serine	D-serine	NO	Isomer of serine (17822).
+CHEBI:17115	serine	L-serine	NO	Isomer of serine (17822).
+CHEBI:44897	phosphoenolpyruvate	phosphoenolpyruvic acid	NO	Conjugate acid of phosphoenolpyruvate (18021).
+CHEBI:15816	arginine	D-arginine	NO	Isomer of arginine (29016).
+CHEBI:16467	arginine	L-arginine	NO	Isomer of arginine (29016).
