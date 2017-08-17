@@ -10,7 +10,7 @@ import shutil
 import gzip
 
 
-def select_sif_edges(edge, gzipped_sif):
+def select_sif_edges(edge, gzipped_sif, input_data_dir, output_data_dir):
     """
     Filters full pathway commons network file for only the relationships
     characterized by an edge of interest (i.e. 'used-to-produce')

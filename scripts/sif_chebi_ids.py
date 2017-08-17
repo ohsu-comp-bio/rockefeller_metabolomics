@@ -8,7 +8,7 @@ Author: Hannah Manning <manningh@ohsu.edu>
 Date: August 8, 2017
 """
 
-def verify_exact_chebis(sif_file):
+def verify_exact_chebis(sif_file, output_data_dir):
     """
     Checks whether exact CHEBI ID matches appear in the used-to-produce sif.
     If they do not, they are written to exact_matches_not_in_sif.tsv
@@ -21,7 +21,7 @@ def verify_exact_chebis(sif_file):
     exact_fh = open(exact_path, "r")
     exact = exact_fh.readlines()
 
-    sif_chebi_list = make_list_of_sif_chebis(sif_file)
+    sif_chebi_list = make_list_of_sif_chebis(sif_file, output_data_dir)
 
     misfits = {}
     for exact_match in exact:
@@ -40,7 +40,7 @@ def verify_exact_chebis(sif_file):
 
     return misfit_loc
 
-def make_list_of_sif_chebis(sif_file):
+def make_list_of_sif_chebis(sif_file, output_data_dir):
     """
     Parses a sif to generate a list of all ChEBI ids that it contains.
     """

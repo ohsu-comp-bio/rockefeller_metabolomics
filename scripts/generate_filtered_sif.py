@@ -19,18 +19,33 @@ Date: August 8, 2017
 
 import pandas as pd
 
-def filter_sif_by_chebi(edge, path_to_addl_chebis):
+def filter_sif_by_chebi(edge, path_to_addl_chebis, output_data_dir):
     """
-    Generates a list of chebi IDs from a file with the format of exact_matches.tsv
-     col1: name provided by researchers
-     col2: chebi ID
-     (i.e. 'malate	CHEBI:25115')
+    Uses ChEBI IDs (from exact-matches and from a user-added file containing
+    additional ChEBI IDs of interest) to filter a .sif with a single edge type
+    (i.e. used-to-produce).
+
+    Builds 3 .sif files:
+        both_filtered_sif: contains relationships wherein both ChEBI IDs were of interest
+        either_filtered_sif: contains relationships wherein either ChEBI ID was of interest
+        dist_2_filtered_sif: contains relationships as in "both_filtered_sif" AND relationships
+            wherein A and C are of interest but some intermediate B is not.
+            i.e., both of the following would be kept, despite B not being of initial interest:
+                    A used-to-produce B
+                    B used-to-produce C
+
     """
+
+    # load single-edged .sif network file (i.e. used-to-produce.sif)
     sif_loc = output_data_dir + edge + ".sif"
     sif_fh = open(sif_loc, "r")
+    sif = sif_fh.readlines()
+
+    # load the ChEBI IDs which matched exactly to provided names
     exact_df = pd.read_csv(output_data_dir + "exact_matches.tsv", sep='\t')
 
-    sif = sif_fh.readlines()
+    # make a list of all the ChEBI IDs in exact and append all the user-added
+    # ChEBI IDs to it
     chebis = exact_df.ix[:,1].tolist()
     if path_to_addl_chebis is not None:
         addl_chebis_file = open(path_to_addl_chebis, "r")
@@ -38,29 +53,93 @@ def filter_sif_by_chebi(edge, path_to_addl_chebis):
         for chb in addl_chebis_fh:
             chb = chb.strip('\n')
             chebis.append(chb)
+
+    # generate names of outfiles
     both_filtered_sif = "chebi-filtered-" + edge + "-BOTH-MEMBERS.sif"
     either_filtered_sif = "chebi-filtered-" + edge + "-EITHER-MEMBER.sif"
+    dist_2_filtered_sif = "chebi-filtered-" + edge + "-DIST-OF-2.sif"
 
+    # open outfiles for writing
     both_matched_file = open(output_data_dir + both_filtered_sif, "w")
     either_matched_file = open(output_data_dir + either_filtered_sif, "w")
+    dist_2_matched_file = open(output_data_dir + dist_2_filtered_sif, "w")
+
+    # prepare to collect all "either" relationships for distance-of-2 assessment
+    eithers = []
+
+    # build BOTH and EITHER networks in one iteration
     for relationship in sif:
         relationship = relationship.strip('\n')
         relationship_parts = relationship.split('\t')
         members = [relationship_parts[0], relationship_parts[2]]
 
         # to generate a sif where 1 member match is sufficient:
+        # TODO: store these for use in determining distance-of-2 relationships
         if any(smallmol in chebis for smallmol in members):
             either_matched_file.write(relationship + '\n')
+            eithers.append(relationship)
 
         # require that both members are present in the matched chebi IDs
+        # write it also to the distance-of-2 network file
         if all(smallmol in chebis for smallmol in members):
             both_matched_file.write(relationship + '\n')
+            dist_2_matched_file.write(relationship + '\n')
 
+    # close single-edge sif, both, and either files
     sif_fh.close()
     both_matched_file.close()
     either_matched_file.close()
 
-    return output_data_dir + both_filtered_sif, output_data_dir + either_filtered_sif
+    # build remainder of distance-of-2 network in a second iteration.
+    # prepare to store relationships members based on whether they
+    # are of interest ("profiled")
+
+    profiled_producer = []
+    unprofiled_producer = []
+
+    profiled_produced = []
+    unprofiled_produced = []
+
+    for rel in eithers:
+        parts = rel.split('\t')
+        producer = parts[0]
+        edge = parts[1]
+        produced = parts[2]
+        if producer in chebis:
+            profiled_producer.append(producer)
+            unprofiled_produced.append(produced)
+        if produced in chebis:
+            profiled_produced.append(produced)
+            unprofiled_producer.append(producer)
+
+    # prepare to capture unprofiled entities which are
+    # produced by a profiled entity. Then evaluate whether
+    # they also produce a profiled entity.
+    middlemen = []
+    for u_pd in unprofiled_produced:
+        if u_pd in unprofiled_producer:
+            middlemen.append(u_pd)
+
+    # iterate through eithers a final time
+    for rel in eithers:
+        parts = rel.split('\t')
+        producer = parts[0]
+        edge = parts[1]
+        produced = parts[2]
+
+        if producer in profiled_producer:
+            if produced in middlemen:
+                dist_2_matched_file.write(rel + '\n')
+        if produced in profiled_produced:
+            if producer in middlemen:
+                dist_2_matched_file.write(rel + '\n')
+
+    dist_2_matched_file.close()
+
+    return output_data_dir + both_filtered_sif, \
+           output_data_dir + either_filtered_sif, \
+           output_data_dir + dist_2_filtered_sif
+
 
 
 def specify_chibe_formatting(sig_chebi_ids, sif_path):
@@ -68,7 +147,6 @@ def specify_chibe_formatting(sig_chebi_ids, sif_path):
     Specify formatting for visualization with Chisio BioPAX Editor (ChiBE)
     For the sake of clarity: ChiBE != ChEBI
     Generates a .format file in the same directory as .sif used by ChiBE
-
 
     Notes from Ozgun:
     If ChiBE finds a .format file with the same name at the same directory of the SIF file,
@@ -105,66 +183,12 @@ def specify_chibe_formatting(sig_chebi_ids, sif_path):
             sif_chebis.append(relationship_members[2])
 
     present_sig_chebi_ids = []
-    for id in sig_chebi_ids:
-        if id in sif_chebis:
-            present_sig_chebi_ids.append(id)
+    for ch_id in sig_chebi_ids:
+        if ch_id in sif_chebis:
+            present_sig_chebi_ids.append(ch_id)
 
-    for id in present_sig_chebi_ids:
-        format_fh.write("node\t" + id + "\tcolor\t23 222 176\n")
+    for ch_id in present_sig_chebi_ids:
+        format_fh.write("node\t" + ch_id + "\tcolor\t23 222 176\n")
     format_fh.close()
 
-
-def convert_sif_chebis_to_names(chid_to_name_map, chebi_sif, new_sif_name):
-    """
-    Uses a 2 col tsv (all_chebis_of_interest.txt) to convert chebi ID's in a
-    filtered sif back to their original names.
-
-    chid_to_name_map = name of 2 col tsv where col 1 = "CHEBI:12345" and col 2 is name
-    chebi_sif = filtered sif i.e. chebi-filtered-used-to-produce-BOTH-MEMBERS.sif
-    new_sif_name = i.e. "named-filtered-used-to-produce-BOTH-MEMBERS.sif"
-
-    Returns new sif file with name specified
-    """
-    chebi_sif_path = output_data_dir + chebi_sif
-    chebi_sif_file = open(chebi_sif_path, "r")
-    chebi_sif = chebi_sif_file.readlines()
-
-    name_map = pd.read_table(output_data_dir + chid_to_name_map, sep = '\t', header=None, index_col=0)
-
-    sif_outf = open(output_data_dir + new_sif_name, "w")
-
-    for relationship in chebi_sif:
-        relationship = relationship.strip('\n')
-        parts = relationship.split('\t')
-        chebi_a = parts[0]
-        edge = parts[1]
-        chebi_b = parts[2]
-
-        # traverse the name map file
-        if chebi_a in name_map.index:
-            name_a = name_map.get_value(chebi_a, 1)
-        elif chebi_a not in name_map.index:
-            print("Failed ChEBI ID to name map: " + chebi_a)
-            name_a = chebi_a
-        if chebi_b in name_map.index:
-            name_b = name_map.get_value(chebi_b, 1)
-        elif chebi_b not in name_map.index:
-            print("Failed ChEBI ID to name map: " + chebi_b)
-            name_b = chebi_b
-        sif_outf.write(name_a + '\t' + edge + '\t' + name_b + '\n')
-
-    chebi_sif_file.close()
-    sif_outf.close()
-    # change format file to reflect IDs
-    if os.path.isfile(chebi_sif_path.replace('.sif','.format')):
-        format_filepath = chebi_sif_path.replace('.sif','.format')
-        format_df = pd.read_csv(format_filepath, sep='\t', header=None)
-        chebis = pd.Series(format_df.ix[:,1])
-
-        for id in chebis:
-            if id in name_map.index:
-                name = name_map.get_value(id, 1)
-                chebis.replace(id, name, inplace=True)
-        format_df[1] = chebis
-        format_df.to_csv(output_data_dir + new_sif_name.replace('.sif', '.format'),
-                         sep='\t', header=False, index=False)
+    return format_path

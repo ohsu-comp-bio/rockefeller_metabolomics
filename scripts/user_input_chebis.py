@@ -2,10 +2,9 @@
 Function for integrating user input in the generation of .sifs.
 """
 
-
 import os
 
-def ask_user_for_chebis(misfit_loc, signif_no_match_loc):
+def ask_user_for_chebis(misfit_loc, signif_no_match_loc, input_data_dir):
     """
     Provides location of file with suggested matches for non-matching, significant chebis.
     Asks user to select which to keep and store them in a separate file.
@@ -46,7 +45,7 @@ def ask_user_for_chebis(misfit_loc, signif_no_match_loc):
         return input_data_dir + addl_chebis_file
 
 
-def make_addl_chebis_file_from_metadata():
+def make_addl_chebis_file_from_metadata(metadata_dir):
     """
     This is a bad idea but it's happening because I'm lazy.
     Extract additional chebis from metadata/meta_data_user_specified_chebis.txt
@@ -68,7 +67,7 @@ def make_addl_chebis_file_from_metadata():
     addl_chebis_file.close()
 
 
-def collect_all_chebis_being_used():
+def collect_all_chebis_being_used(metadata_dir):
     """
     Another slapped-together function that will serve a purpose right now
     but maybe not later.
