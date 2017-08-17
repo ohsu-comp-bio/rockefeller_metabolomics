@@ -187,8 +187,9 @@ def specify_chibe_formatting(sig_chebi_ids, sif_path):
         if ch_id in sif_chebis:
             present_sig_chebi_ids.append(ch_id)
 
+    # color the borders of significantly altered metabs red
     for ch_id in present_sig_chebi_ids:
-        format_fh.write("node\t" + ch_id + "\tcolor\t23 222 176\n")
+        format_fh.write("node\t" + ch_id + "\tbordercolor\t23 222 176\n")
     format_fh.close()
 
     return format_path

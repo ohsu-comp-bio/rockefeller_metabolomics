@@ -13,21 +13,28 @@ def ask_user_for_chebis(misfit_loc, signif_no_match_loc, input_data_dir):
     signif_close_matches_file = signif_no_match_loc.replace('/scripts/..','')
     misfit_loc = misfit_loc.replace('/scripts/..','')
 
-    print("{}{}".format("\nPlease review ", signif_close_matches_file))
-    print("Select CHEBI IDs from that file that you would like\n"
-          "to include in the network by generating a file in input/\n"
+    # print("{}{}".format("\nPlease review ", signif_close_matches_file))
+    print("You may specify additional ChEBI IDs to include in network generation\n"
+          "by generating a file in input/\n\n"
           "Format: 1 CHEBI ID per line i.e.\n"
           "CHEBI:12345\n"
           "CHEBI:23456\n")
-    print("{}{}".format("You may also wish to review\n", misfit_loc))
-    print("Exact CHEBI IDs in that file do not appear in the used-to-produce.sif.\n"
-          "You may search https://www.ebi.ac.uk/chebi/ for alternatives to add to\n"
-          "the file described above.")
+    print("Create 1 such file containing ALL additional ChEBIS and 1 file containing\n"
+          "ONLY the significantly altered ChEBIs (for network formatting purposes)")
+    # print("{}{}".format("You may also wish to review\n", misfit_loc))
+    # print("Exact CHEBI IDs in that file do not appear in the used-to-produce.sif.\n"
+    print("You may search https://www.ebi.ac.uk/chebi/ for alternatives to add to\n"
+          "the files described above.")
 
 
     # ask user where they stored their manually curated chebis
-    addl_chebis_file = input("Enter the name of your additional CHEBI IDs file\n"
+    addl_chebis_file = input("Enter the name of your 'ALL' additional ChEBI IDs file\n"
                              "(or 'n' to skip): ")
+
+    # TODO: CONTINUE
+    # signif_addl_chebis_file = input("Enter the name of your 'SIGNIFICANT' additional ChEBI IDs file\n"
+    #                                "(or 'n' to skip): ")
+
     if addl_chebis_file != 'n':
         while not os.path.exists(input_data_dir + addl_chebis_file):
             print(addl_chebis_file + " not found.\n "
@@ -45,9 +52,9 @@ def ask_user_for_chebis(misfit_loc, signif_no_match_loc, input_data_dir):
         return input_data_dir + addl_chebis_file
 
 
-def make_addl_chebis_file_from_metadata(metadata_dir):
+def make_addl_chebis_files_from_metadata(metadata_dir):
     """
-    This is a bad idea but it's happening because I'm lazy.
+    This might be a bad idea but it's happening because I'm lazy.
     Extract additional chebis from metadata/meta_data_user_specified_chebis.txt
     and build user_added_chebis_ALL.txt
     """
@@ -56,15 +63,26 @@ def make_addl_chebis_file_from_metadata(metadata_dir):
     notes = notes_fh.readlines()
 
     addl_chebis = []
+    signif_addl_chebis = []
     for line in notes:
         if line.startswith('CHEBI:'):
             line = line.split('\t')
-            addl_chebis.append(line[0])
+            chebi_id = line[0]
+            signif = line[3]
+            addl_chebis.append(chebi_id)
+            if signif == 'YES':
+                signif_addl_chebis.append(chebi_id)
 
     addl_chebis_file = open(input_data_dir + 'user_added_chebis_ALL.txt', 'w')
+    signif_addl_chebis_file = open(input_data_dir + 'user_added_chebis_SIGNIF_ONLY.txt', 'w')
+
     for i in addl_chebis:
         addl_chebis_file.write(i + '\n')
     addl_chebis_file.close()
+
+    for i in signif_addl_chebis:
+        signif_addl_chebis_file.write(i + '\n')
+    signif_addl_chebis_file.close()
 
 
 def collect_all_chebis_being_used(metadata_dir):

@@ -54,6 +54,7 @@ def main():
     select_sif_edges(edge, sif, input_data_dir, output_data_dir)
     metabs = get_metabolites(assay_data, input_data_dir, output_data_dir)
 
+    # TODO: Ensure that all signif_chebis are captured (including manually curated)
     [signif_chebis, signif_no_chebi_match] = get_significant_metabs(assay_data, input_data_dir)
 
     if len(signif_no_chebi_match) > 0:
@@ -87,6 +88,8 @@ def main():
     print("Converting ChEBI IDs in EITHER .sif...")
     convert_chebi_sif_to_named_sif(either_sif_path, input_data_dir, output_data_dir)
 
+    print("Conerting ChEBI IDs in DISTANCE-OF-2 .sif...")
+    convert_chebi_sif_to_named_sif(dist_2_path, input_data_dir, output_data_dir)
 
 if __name__ == '__main__':
     main()
