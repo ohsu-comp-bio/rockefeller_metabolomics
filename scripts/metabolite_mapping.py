@@ -33,10 +33,12 @@ def get_metabolites(assay_file, input_data_dir):
     return metabolites
 
 
-def get_significant_metabs(assay_file, input_data_dir):
+def get_significant_metab_chebis(assay_file, input_data_dir):
     """
-    Returns a list of metabolites whose fold change in abundance achieved significance
-    at the p < 0.05 level according to a t-test between sensitive and resistant strains.
+    Returns a 2 lists of ChEBI IDs for metabolites whose fold change in abundance achieved
+    significance at the p < 0.05 level according to a t-test between sensitive and
+    resistant strains. If exact matches are available in the ChEBI database, those ChEBI IDs
+    are entered into list 1. If no matches are found, the names are entered into list 2.
     """
     # i.e. 'assay_results.tsv'
     assay_results_path = input_data_dir + assay_file

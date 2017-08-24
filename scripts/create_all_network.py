@@ -5,7 +5,7 @@ fold changes in the abundance of small molecules in sensitive and
 resistant cell lines following pathway perturbation.
 
 Example command:
-    python create_network.py -e used-to-produce
+    python create_all_network.py -e used-to-produce
         -s PathwayCommons9.All.hgnc.sif.gz
         -a assay_results.tsv
 
@@ -32,7 +32,7 @@ metadata_dir = base_dir + '/../metadata/'
 output_data_dir = base_dir + '/../data/output/'
 sys.path += [base_dir + '/../../Rockefeller_Metabolomics']
 
-# TODO: note to self: you generate a complete given-name to
+
 # all derived chebi IDs map with pull_from_metadata's group_chebis_of_same_parent
 def main():
     # take user-specified names of files
@@ -68,7 +68,8 @@ def main():
     metabs = get_metabolites(assay_data,
                              input_data_dir)
 
-    [signif_chebis, signif_no_chebi_match] = get_significant_metabs(assay_data, input_data_dir)
+    # TODO: USE THE META DATA TO ENSURE THAT ALL CHEBIS DERIVED FROM SIGNIF PARENT ARE HERE
+    [signif_chebis, signif_no_chebi_match] = get_significant_metab_chebis(assay_data, input_data_dir)
 
     if len(signif_no_chebi_match) > 0:
         print("Exact ChEBI ID matches could not be found for the following " +
