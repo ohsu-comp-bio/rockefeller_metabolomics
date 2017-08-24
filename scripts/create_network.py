@@ -13,12 +13,14 @@ Author: Hannah Manning <manningh@ohsu.edu>
 Date: August 8, 2017
 """
 
-from filter_sif_edge import *
+from filter_sif import *
 from metabolite_mapping import *
 from sif_chebi_ids import *
 from user_input_chebis import *
-from generate_filtered_sif import *
 from assay_results_stats import *
+from format_sif import *
+from pull_from_metadata import *
+from utils import *
 
 import argparse
 import sys
@@ -30,6 +32,8 @@ metadata_dir = base_dir + '/../metadata/'
 output_data_dir = base_dir + '/../data/output/'
 sys.path += [base_dir + '/../../Rockefeller_Metabolomics']
 
+# TODO: note to self: you generate a complete given-name to
+# all derived chebi IDs map with pull_from_metadata's group_chebis_of_same_parent
 def main():
     # take user-specified names of files
     parser = argparse.ArgumentParser()
@@ -51,10 +55,19 @@ def main():
     assay_data = args.assay_file
 
     print("Paring greater .sif file by user-specified edge: " + edge)
-    select_sif_edges(edge, sif, input_data_dir, output_data_dir)
-    metabs = get_metabolites(assay_data, input_data_dir, output_data_dir)
+    select_sif_edges(edge,
+                     sif,
+                     input_data_dir,
+                     output_data_dir)
 
-    # TODO: Ensure that all signif_chebis are captured (including manually curated)
+    # TODO: put a function here that uses assay_data to generate the dataframe
+    # TODO: pass that dataframe to get_metabolites and to get_significant metabs
+    # TODO: pass that dataframe to any and all functions in assay_results_stats
+    # TODO: pass that dataframe to formatting function to set node color with rgb
+
+    metabs = get_metabolites(assay_data,
+                             input_data_dir)
+
     [signif_chebis, signif_no_chebi_match] = get_significant_metabs(assay_data, input_data_dir)
 
     if len(signif_no_chebi_match) > 0:
@@ -64,32 +77,53 @@ def main():
             print(name)
 
     print("Identifying significant IDs with no exact ChEBI ID match...")
-    signif_no_chebi_match = map_all_metabs_to_chebi_ids(metabs, signif_no_chebi_match, output_data_dir)
+    signif_no_chebi_match = map_all_metabs_to_chebi_ids(metabs,
+                                                        signif_no_chebi_match,
+                                                        output_data_dir)
 
     print("Verifying presence of exact ChEBI ID matches in " + edge + ".sif...")
     misfit_loc = verify_exact_chebis('used-to-produce.sif', output_data_dir)
 
     # ask user to supply an file with additional ChEBI IDs to include in network
-    path_to_addl_chebis = ask_user_for_chebis(misfit_loc, signif_no_chebi_match, input_data_dir)
+    [path_to_addl_chebis, path_to_addl_signif_chebis] = ask_user_for_chebis(misfit_loc,
+                                                                            signif_no_chebi_match,
+                                                                            input_data_dir)
 
+    signif_chebis = add_lines_to_list(path_to_addl_signif_chebis,
+                                      signif_chebis)
+
+    # TODO: note that this won't work if the user hasn't already provided a metadata file...
     print("Filtering " + edge + ".sif by ChEBI IDs of interest...")
     [both_sif_path, either_sif_path, dist_2_path] = filter_sif_by_chebi(edge,
                                                            path_to_addl_chebis,
                                                            output_data_dir)
 
+    # TODO: fix this nasty hardcoding
     print("Specifying .sif format for ChiBE visualization...")
-    specify_chibe_formatting(signif_chebis, both_sif_path)
-    specify_chibe_formatting(signif_chebis, either_sif_path)
-    specify_chibe_formatting(signif_chebis, dist_2_path)
+    specify_chibe_formatting(signif_chebis,
+                             both_sif_path,
+                             "assay_results_extended.tsv")
+    specify_chibe_formatting(signif_chebis,
+                             either_sif_path,
+                             "assay_results_extended.tsv")
+    specify_chibe_formatting(signif_chebis,
+                             dist_2_path,
+                             "assay_results_extended.tsv")
 
     print("Converting ChEBI IDs in BOTH .sif...")
-    convert_chebi_sif_to_named_sif(both_sif_path, input_data_dir, output_data_dir)
+    convert_chebi_sif_to_named_sif(both_sif_path,
+                                   input_data_dir,
+                                   output_data_dir)
 
     print("Converting ChEBI IDs in EITHER .sif...")
-    convert_chebi_sif_to_named_sif(either_sif_path, input_data_dir, output_data_dir)
+    convert_chebi_sif_to_named_sif(either_sif_path,
+                                   input_data_dir,
+                                   output_data_dir)
 
-    print("Conerting ChEBI IDs in DISTANCE-OF-2 .sif...")
-    convert_chebi_sif_to_named_sif(dist_2_path, input_data_dir, output_data_dir)
+    print("Converting ChEBI IDs in DISTANCE-OF-2 .sif...")
+    convert_chebi_sif_to_named_sif(dist_2_path,
+                                   input_data_dir,
+                                   output_data_dir)
 
 if __name__ == '__main__':
     main()

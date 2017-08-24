@@ -20,7 +20,7 @@
 #   ribose_ribulose_5-phosphate (does this mean either of ribose 5-phosphate or ribulose 5-phosphate?)
 #   acetylserine (45441, 17981, 58340 don't appear in used-to-produce.sif)
 
-ADDED_CHEBI_ID    METAB_OF_INTEREST  ADDED_ID_NAME SIGNIFICANT    DETAILS
+ADDED_CHEBI_ID	METAB_OF_INTEREST	ADDED_ID_NAME	SIGNIFICANT	DETAILS
 CHEBI:29990	aspartate	D-aspartate(1-)	YES	Exact aspartate match (132943) doesn't appear in used-to-produce.sif. Nor do aspartate(1-) or L- or D- aspartate(2-) ions (35391,29993,29994).
 CHEBI:29991	aspartate	L-aspartate(2-)	YES	Exact aspartate match (132943) doesn't appear in used-to-produce.sif. Nor do aspartate(1-) or L- or D- aspartate(2-) ions (35391,29993,29994).
 CHEBI:29995	aspartate	aspartate(2-)	YES	Exact aspartate match (132943) doesn't appear in used-to-produce.sif. Nor do aspartate(1-) or L- or D- aspartate(2-) ions (35391,29993,29994).
@@ -40,7 +40,7 @@ CHEBI:62501	folate	folate(2-)	YES	No exact ChEBI match found for folate or other
 CHEBI:57472	arginosuccinate	(N(omega)-L-argino)succinate(1-)	YES	No exact ChEBI match found for arginosuccinate.
 CHEBI:18019	lysine	L-lysine	NO	Exact lysine match (25094) doesn't appear in used-to-produce.sif. Nor does D- isomer (18655).
 CHEBI:17191	isoleucine	L-isoleucine	NO	Exact isoleucine match (24898) doesn't appear in used-to-produce.sif. Nor does D- isomer (27730)
-CHEBI:57742	guanidinoacetate	guanidinoacetic acid zwitterion		NO	Exact guanidinoacetate match (131444) doesn't appear in used-to-produce.sif.
+CHEBI:57742	guanidinoacetate	guanidinoacetic acid zwitterion	NO	Exact guanidinoacetate match (131444) doesn't appear in used-to-produce.sif.
 CHEBI:16344	guanidinoacetate	guanidinoacetic acid	NO	Exact guanidinoacetate match (13144) doesn't appear in used-to-produce.sif
 CHEBI:11596	2-hydroxyglutarate	2-hydroxyglutarate(2-)	NO	Exact 2-hydroxyglutarate match (132941) doesn't appear in used-to-produce.sif. Nor does 1- ion (36149).
 CHEBI:16349	citrulline	L-citrulline	NO	Exact citrulline match (18211) doesn't appear in used-to-produce.sif. Nor does D- isomer (49007).

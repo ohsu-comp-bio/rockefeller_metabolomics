@@ -12,16 +12,69 @@ assay_results.tsv:
 
 import pandas as pd
 import numpy as np
+import scipy.stats as st
 import math
+import itertools
+import shutil
+import gzip
+import os
+import sys
+
+base_dir = os.path.dirname(os.path.realpath(__file__))
+input_data_dir = base_dir + '/../data/input/'
+metadata_dir = base_dir + '/../metadata/'
+output_data_dir = base_dir + '/../data/output/'
+sys.path += [base_dir + '/../../Rockefeller_Metabolomics']
+
+
+def select_sif_edges(edge, gzipped_sif, input_data_dir, output_data_dir):
+    """
+    Filters full pathway commons network file for only the relationships
+    characterized by an edge of interest (i.e. 'used-to-produce')
+    """
+    # i.e. 'PathwayCommons9.All.hgnc.sif.gz'
+    sif_path = input_data_dir + gzipped_sif
+
+    # i.e. 'used-to-produce'
+    desired_edge = edge
+    outf_name = output_data_dir + desired_edge + '.sif'
+
+    # open gzipped sif file
+    with gzip.open(sif_path, 'rt') as inf:
+        sif = inf.readlines()
+
+    outfh = open(outf_name, "w")
+
+    for line in sif:
+        if line == '\n':
+            break
+        line = line.strip('\n')
+        current_edge = line.split('\t')[1]
+        if current_edge == desired_edge:
+            outfh.write(line + '\n')
+
+    outfh.close()
+
+    # compress your new file
+    with open(outf_name, 'rb') as not_zipped, gzip.open(outf_name + '.gz', 'wb') as zipped:
+        shutil.copyfileobj(not_zipped, zipped)
+
 
 # TODO: Verify the log base used to generate these values
-def get_geometric_mean(assay_file, input_data_dir):
+# TODO: What to do with the geometric mean?
+# TODO: include in create_network?
+def add_geometric_cols(assay_file, input_data_dir):
     """
-    Calculates a 2 vectors:
-        1 vector of geometric means of sensitive cell line metabolite abundance changes
-        1 vector of geometric means of resistant cell line metabolite abundance changes
+    Calculates 6 vectors:
+        geometric means of sensitive cell line metabolite abundance changes
+        geometric means of resistant cell line metabolite abundance changes
+        geometric means of all cell line metabolite abundance changes
+        geometric variance of sensitive cell line metabolite abundance changes
+        geometric variance of resistant cell line metabolite abundance changes
+        geometric variance of all cell line metabolite abundance changes
 
     Geometric mean: the anti-log of the arithmetic mean of log-transformed values.
+    Geometric variance: the anti-log of the arithmetic variance of log-transformed values.
 
     Generates assay_results_extended.tsv
     Returns assay results in the form of pd.DataFrame (including geom. means)
@@ -47,17 +100,154 @@ def get_geometric_mean(assay_file, input_data_dir):
     for metab in assay_results.index:
         sensitive = assay_results.ix[metab,:6]
         resistant = assay_results.ix[metab,6:12]
-        s_arith_mean = np.mean(sensitive)
-        r_arith_mean = np.mean(resistant)
-        s_geom_mean = math.e**s_arith_mean
-        r_geom_mean = math.e**r_arith_mean
-        assay_results.ix[metab, 'sensitive_gmean'] = s_geom_mean
-        assay_results.ix[metab, 'resistant_gmean'] = r_geom_mean
+        overall = assay_results.ix[metab,:12]
+
+        for count, group in enumerate([sensitive, resistant, overall]):
+            arith_mean = np.mean(group)
+            arith_var = np.var(group)
+            geom_mean = math.e**arith_mean
+            geom_var = math.e**arith_var
+            if count == 0:
+                assay_results.ix[metab, 'sensitive_gmean'] = geom_mean
+                assay_results.ix[metab, 'sensitive_gvar'] = geom_var
+            if count == 1:
+                assay_results.ix[metab, 'resistant_gmean'] = geom_mean
+                assay_results.ix[metab, 'resistant_gvar'] = geom_var
+            if count == 2:
+                assay_results.ix[metab, 'overall_gmean'] = geom_mean
+                assay_results.ix[metab, 'overall_gvar'] = geom_var
 
     # TODO: Determine how to not have it replace digits after the 14th decimal point with zeros
+    # note that setting float_format='%.14f' causes sum(), np.sum(), etc. to output "inf" :|
     assay_results.to_csv(assay_results_path.replace('.tsv','_extended.tsv'),
                          sep='\t',
-                         float_format='%.14f',
+                         #float_format='%.14f',
+                         na_rep='NaN')
+    return assay_results
+
+
+# TODO: make sense of this output
+def add_spearmans_corr_col(assay_results_df):
+    """
+    Takes assay_results pd.DataFrame and calculates the Spearman's rank correlation
+    between the sensitive and resistant cell lines for each metabolite.
+    Inserts a column with the spearman's rho.
+    Inserts a column with the p-value of this correlation.
+    Returns the amended pd.DataFrame
+    """
+    # prepare to collect the spearman's correlation and p value
+    sp_corr = []
+    sp_pval = []
+
+    # calculate spearman's correlation
+    for metab in assay_results_df.index:
+        sensitive = assay_results_df.ix[metab][:6]
+        resistant = assay_results_df.ix[metab][6:12]
+        # calculate spearman's correlation
+        # calculate as though NaNs are not present
+        spearmanr = st.spearmanr(sensitive,
+                                 resistant,
+                                 nan_policy='omit')
+        sp_corr.append(spearmanr.correlation)
+        sp_pval.append(spearmanr.pvalue)
+
+    assay_results_df['spearman_corr'] = sp_corr
+    assay_results_df['spearman_pval'] = sp_pval
+
+    assay_results_df.to_csv(input_data_dir + 'assay_results_extended.tsv',
+                         sep='\t',
+                         #float_format='%.14f',
                          na_rep='NaN')
 
-    return assay_results
+    return assay_results_df
+
+
+def add_fc_between_geom_means(assay_results_df):
+    """
+    Calculates the fold change between the geometric means of the sensitive
+    and resistant cell lines for each metabolite. Adds this column to the df.
+    Writes out and returns the new dataframe.
+
+    If sens gmean = 0.5 and res gmean = 1.0, FC = 1.0
+    if sens gmean = 1.0 and res gmean = 0.5, FC = -0.5
+    """
+    assay_results_df['fc_gmeans'] = assay_results_df['resistant_gmean']/assay_results_df['sensitive_gmean'] - 1
+    assay_results_df.to_csv(input_data_dir + 'assay_results_extended.tsv',
+                         sep='\t',
+                         na_rep='NaN')
+
+    return assay_results_df
+
+def add_ind_ttest_col(assay_results_df):
+    """
+    Seeing if I can replicate their ttest results.
+    (Yes, this is how they did it).
+    """
+    ttest_statistic = []
+    ttest_pval = []
+    for metab in assay_results_df.index:
+        sensitive = assay_results_df.ix[metab][:6]
+        resistant = assay_results_df.ix[metab][6:12]
+        ttest = st.ttest_ind(sensitive,
+                             resistant)
+        #                     nan_policy='omit')
+        # omitting the nans breaks it...
+        ttest_statistic.append(ttest.statistic)
+        ttest_pval.append(ttest.pvalue)
+
+    assay_results_df['T_stat'] = ttest_statistic
+    assay_results_df['ttest_pval'] = ttest_pval
+
+    return assay_results_df
+
+# TODO: Compute a matrix of spearman correlations between all pairs of profiled metabs
+# i.e. all 12 malate FCs vs. all 12 aspartate FCs
+# can i do something where it's [6 sens malate vs 6 sens aspartate] vs [6 res malate vs 6 res aspartate]?
+def make_pairwise_metab_spearman_matrix(assay_results_df):
+    """
+    Computes a matrix of spearman correlations between all pairs of profiled metabs
+    Correlates two groups of n=12
+
+    Such that the x axis and y axis share the same labels.
+        i.e.
+                    malate  UDP-hexose  aspartate   ... arginine
+        malate        X         X           X               X
+        UDP-hexose              X           X               X
+        aspartate                           X               X
+        ...
+        arginine                                            X
+
+    """
+    # isolate the fold change values
+    assay_results_df = assay_results_df.ix[:,:12]
+
+    # initialize empty dataframes
+    corr_df = pd.DataFrame(index = assay_results_df.index,
+                           columns = assay_results_df.index)
+
+    pval_df = pd.DataFrame(index = assay_results_df.index,
+                           columns = assay_results_df.index)
+
+    # get an itertools.combinations object of metabolite pairs
+    pairs = itertools.combinations(assay_results_df.index, 2)
+
+    for pair in pairs:
+        metab1 = assay_results_df.ix[pair[0]][:12]
+        metab2 = assay_results_df.ix[pair[1]][:12]
+
+        # calculate spearman's correlation
+        # calculate as though NaNs are not present
+        spearmanr = st.spearmanr(metab1,
+                                 metab2,
+                                 nan_policy='omit')
+
+        corr_df.ix[pair[0], pair[1]] = spearmanr.correlation
+        pval_df.ix[pair[0], pair[1]] = spearmanr.pvalue
+
+    corr_df.to_csv(input_data_dir + 'pairwise_spearman_corr_coef.tsv',
+                   sep='\t',
+                   na_rep='NaN')
+    pval_df.to_csv(input_data_dir + 'pairwise_spearman_pval.tsv',
+                   sep='\t',
+                   na_rep='NaN')
+

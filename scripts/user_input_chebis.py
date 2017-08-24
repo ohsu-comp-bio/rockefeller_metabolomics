@@ -32,8 +32,8 @@ def ask_user_for_chebis(misfit_loc, signif_no_match_loc, input_data_dir):
                              "(or 'n' to skip): ")
 
     # TODO: CONTINUE
-    # signif_addl_chebis_file = input("Enter the name of your 'SIGNIFICANT' additional ChEBI IDs file\n"
-    #                                "(or 'n' to skip): ")
+    signif_addl_chebis_file = input("Enter the name of your 'SIGNIFICANT' additional ChEBI IDs file\n"
+                                    "(or 'n' to skip): ")
 
     if addl_chebis_file != 'n':
         while not os.path.exists(input_data_dir + addl_chebis_file):
@@ -45,11 +45,26 @@ def ask_user_for_chebis(misfit_loc, signif_no_match_loc, input_data_dir):
             if addl_chebis_file == 'n':
                 break
 
-    if addl_chebis_file == 'n':
-        return None
+    if signif_addl_chebis_file != 'n':
+        while not os.path.exists(input_data_dir + signif_addl_chebis_file):
+            print(signif_addl_chebis_file + " not found.\n "
+                                     "Ensure that file name is correct and that it is located in\n" +
+                                     input_data_dir)
+            signif_addl_chebis_file = input("Enter the name of the file (or 'n' to skip): ")
+            # if the user changes her mind and decides not to use a file, break loop
+            if signif_addl_chebis_file == 'n':
+                break
 
-    else:
-        return input_data_dir + addl_chebis_file
+    all_addl = None
+    signif_addl = None
+
+    if addl_chebis_file != 'n':
+        all_addl = input_data_dir + addl_chebis_file
+
+    if signif_addl_chebis_file != 'n':
+        signif_addl = input_data_dir + signif_addl_chebis_file
+
+    return all_addl, signif_addl
 
 
 def make_addl_chebis_files_from_metadata(metadata_dir):
@@ -83,47 +98,3 @@ def make_addl_chebis_files_from_metadata(metadata_dir):
     for i in signif_addl_chebis:
         signif_addl_chebis_file.write(i + '\n')
     signif_addl_chebis_file.close()
-
-
-def collect_all_chebis_being_used(metadata_dir):
-    """
-    Another slapped-together function that will serve a purpose right now
-    but maybe not later.
-    Gets CHEBI IDs from exact_matches.tsv and from user_added_chebis_ALL.txt
-    Writes them out to all_chebis_of_interest.txt.
-
-    AND MAPS THEM TO THEIR NON-CHEBI-ID NAMES.
-    """
-    user_added_path = input_data_dir + 'user_added_chebis_ALL.txt'
-    user_added_file = open(user_added_path, "r")
-    user_added = user_added_file.readlines()
-
-    meta_path = metadata_dir + 'meta_data_user_specified_chebis.txt'
-    meta_file = open(meta_path, "r")
-    meta = meta_file.readlines()
-
-    exact_matches_path = output_data_dir + 'exact_matches.tsv'
-    exact_matches_file = open(exact_matches_path, "r")
-    exact_matches = exact_matches_file.readlines()
-
-    all_chebis_of_interest = open(output_data_dir + 'all_chebis_of_interest.txt', "w")
-
-    for line in exact_matches:
-        line = line.strip('\n')
-        parts = line.split('\t')
-        name = parts[0]
-        chebi_id = parts[1]
-        all_chebis_of_interest.write(chebi_id + '\t' + name + '\n')
-
-    exact_matches_file.close()
-
-    for line in meta:
-        if line.startswith('CHEBI:'):
-            parts = line.split('\t')
-            chebi_id = parts[0]
-            name = parts[2]
-            all_chebis_of_interest.write(chebi_id + '\t' + name + '\n')
-
-    user_added_file.close()
-    meta_file.close()
-    all_chebis_of_interest.close()

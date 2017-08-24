@@ -8,6 +8,8 @@ Author: Hannah Manning <manningh@ohsu.edu>
 Date: August 8, 2017
 """
 
+from utils import *
+
 def verify_exact_chebis(sif_file, output_data_dir):
     """
     Checks whether exact CHEBI ID matches appear in the used-to-produce sif.

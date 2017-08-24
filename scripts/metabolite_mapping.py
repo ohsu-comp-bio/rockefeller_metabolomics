@@ -15,7 +15,7 @@ import pandas as pd
 import os
 
 
-def get_metabolites(assay_file, input_data_dir, output_data_dir):
+def get_metabolites(assay_file, input_data_dir):
     """
     Gets list of metabolites from assay_results.tsv.
 
