@@ -9,3 +9,4 @@ data/input/names.tsv
 data/output/*
 scripts/scratch.py
 *.pyc
+.idea/*
