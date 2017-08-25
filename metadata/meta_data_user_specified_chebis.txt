@@ -28,7 +28,7 @@ CHEBI:6650	malate	malic acid	YES	Exact malate match (25115) doesn't appear in us
 CHEBI:21557	N-acetylmethionine	N-acetyl-L-methionine	YES Exact N-acetylmethionine match (132958) doesn't appear in used-to-produce.sif. Nor does D- isomer (85210) or it's 1- ion (85220).
 CHEBI:16947	citrate	citrate(3-)	YES	No exact ChEBI match found for citrate. Other ions do not appear in used-to-produce.sif (1- ion: 35804; 2- ion: 35808).
 CHEBI:16383	cis-aconitate	cis-aconitate(3-)	YES	No exact ChEBI match found for cis-aconitate. Nor for cis-aconitate(1-) or (2-) ions.
-CHEBI:16863	6-phosphogluconate	6-phospho-D-gluconate	YES	No exact ChEBI match found for 6-phosphogluconate. Nor fofr 6-phospho-L-gluconate.
+CHEBI:16863	6-phosphogluconate	6-phospho-D-gluconate	YES	No exact ChEBI match found for 6-phosphogluconate. Nor for 6-phospho-L-gluconate.
 CHEBI:37154	fumarate	fumarate(1-)	YES	No exact ChEBI match found for fumarate.
 CHEBI:29806	fumarate	fumarate(2-)	YES	No exact ChEBI match found for fumarate.
 CHEBI:16680	S-adenosylhomocysteine	S-adenosyl-L-homocysteine	YES	No exact ChEBI match found for S-adenosylhomocysteine. Nor for D- isomer.
@@ -96,13 +96,13 @@ CHEBI:17138	glyceraldehyde_3-phosphate	glyceraldehyde 3-phosphate	NO	No match fo
 CHEBI:58027	glyceraldehyde_3-phosphate	glyceraldehyde 3-phosphate(2-)	NO	No match for glyceraldehyde_3-phosphate.
 CHEBI:59776	glyceraldehyde_3-phosphate	D-glyceraldehyde 3-phosphate(2-)	NO	No match for glyceraldehyde_3-phosphate.
 CHEBI:17858	GSSG	glutathione disulfide	NO	No match for GSSG. This is its extended name.
-CHEBI:15678	allantoin	(S)-(+)-allantoin	NO	Isomer of allantoin (15676). (R)-(-)-allantoin isomer (15677) doesn't appear in used-to-produce.sif.
-CHEBI:246422	dUMP	dUMP(2-)	NO	Conjugate base of dUMP (17622).
-CHEBI:58223	UDP	UDP(3-)	NO	Conjugate base of UDP (17659).
-CHEBI:57288	acetyl-CoA	acetyl-CoA(4-)	NO	Conjugate base of acetyl-CoA (15351).
-CHEBI:58069	CDP	CDP(3-)	NO	Conjugate base of CDP (17239).
-CHEBI:456216	ADP	ADP(3-)	NO	Conjugate base of ADP (16761). ADP(2-) (87518) doesn't appear in used-to-produce.sif.
-CHEBI:46398	UTP	UTP(4-)	NO	Conjugate base of UTP (15713). UTP(3-) (57481) doesn't appear in used-to-produce.sif.
+CHEBI:15678	allantoin	(S)-(+)-allantoin	YES	Isomer of allantoin (15676). (R)-(-)-allantoin isomer (15677) doesn't appear in used-to-produce.sif.
+CHEBI:246422	dUMP	dUMP(2-)	YES	Conjugate base of dUMP (17622).
+CHEBI:58223	UDP	UDP(3-)	YES	Conjugate base of UDP (17659).
+CHEBI:57288	acetyl-CoA	acetyl-CoA(4-)	YES	Conjugate base of acetyl-CoA (15351).
+CHEBI:58069	CDP	CDP(3-)	YES	Conjugate base of CDP (17239).
+CHEBI:456216	ADP	ADP(3-)	YES	Conjugate base of ADP (16761). ADP(2-) (87518) doesn't appear in used-to-produce.sif.
+CHEBI:46398	UTP	UTP(4-)	YES	Conjugate base of UTP (15713). UTP(3-) (57481) doesn't appear in used-to-produce.sif.
 CHEBI:16004	lactate	(R)-lactate	NO	Isomer of lactate (24996).
 CHEBI:16651	lactate (S)-lactate	NO	Isomer of lactate (24996).
 CHEBI:78320	lactate	2-hydroxypropanoic acid	NO	Conjugate acid of lactate

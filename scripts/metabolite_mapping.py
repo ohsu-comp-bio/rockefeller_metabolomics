@@ -18,7 +18,6 @@ import os
 def get_metabolites(assay_file, input_data_dir):
     """
     Gets list of metabolites from assay_results.tsv.
-
     assay_results.tsv:
         -matrix with cell lines as cols and metabolites as row names
         -final column is the p-value resulting from a t-test between
@@ -31,7 +30,6 @@ def get_metabolites(assay_file, input_data_dir):
     metabolites = assay_results.index.tolist()
 
     return metabolites
-
 
 def get_significant_metab_chebis(assay_file, input_data_dir):
     """
