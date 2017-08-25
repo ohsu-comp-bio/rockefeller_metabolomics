@@ -17,11 +17,11 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="create_all_network.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="create_all_network.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/scripts/create_all_network.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1065">
-              <caret line="71" column="73" lean-forward="false" selection-start-line="71" selection-start-column="73" selection-end-line="71" selection-end-column="73" />
+            <state relative-caret-position="150">
+              <caret line="10" column="0" lean-forward="true" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
               <folding>
                 <element signature="e#469#493#0" expanded="true" />
               </folding>
@@ -32,21 +32,24 @@
       <file leaf-file-name="metabolite_mapping.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/metabolite_mapping.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="120">
+            <state relative-caret-position="495">
               <caret line="33" column="0" lean-forward="false" selection-start-line="33" selection-start-column="0" selection-end-line="33" selection-end-column="0" />
               <folding>
                 <element signature="e#257#280#0" expanded="true" />
+                <marker date="1503622095000" expanded="true" signature="942:2336" ph="..." />
+                <marker date="1503622095000" expanded="true" signature="2027:2286" ph="..." />
+                <marker date="1503622095000" expanded="true" signature="2417:5357" ph="..." />
+                <marker date="1503622095000" expanded="true" signature="2422:3245" ph="&quot;&quot;&quot;...&quot;&quot;&quot;" />
+                <marker date="1503622095000" expanded="true" signature="3343:4609" ph="..." />
+                <marker date="1503622095000" expanded="true" signature="3462:3637" ph="..." />
+                <marker date="1503622095000" expanded="true" signature="3674:4609" ph="..." />
+                <marker date="1503622095000" expanded="true" signature="3875:4609" ph="..." />
+                <marker date="1503622095000" expanded="true" signature="4226:4609" ph="..." />
+                <marker date="1503622095000" expanded="true" signature="4336:4609" ph="..." />
+                <marker date="1503622095000" expanded="true" signature="5898:5991" ph="..." />
+                <marker date="1503622095000" expanded="true" signature="7124:7192" ph="..." />
+                <marker date="1503622095000" expanded="true" signature="7649:7903" ph="..." />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name=".gitignore" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/.gitignore">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="165">
-              <caret line="11" column="7" lean-forward="true" selection-start-line="11" selection-start-column="7" selection-end-line="11" selection-end-column="7" />
-              <folding />
             </state>
           </provider>
         </entry>
@@ -493,15 +496,15 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1354" height="821" extended-state="0" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3735934" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3289855" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.1920439" sideWeight="0.5086272" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.21399178" sideWeight="0.49137285" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.15153788" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.31687242" sideWeight="0.49737436" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.31687242" sideWeight="0.49737436" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -696,10 +699,23 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/scripts/metabolite_mapping.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
+        <state relative-caret-position="495">
           <caret line="33" column="0" lean-forward="false" selection-start-line="33" selection-start-column="0" selection-end-line="33" selection-end-column="0" />
           <folding>
             <element signature="e#257#280#0" expanded="true" />
+            <marker date="1503622095000" expanded="true" signature="942:2336" ph="..." />
+            <marker date="1503622095000" expanded="true" signature="2027:2286" ph="..." />
+            <marker date="1503622095000" expanded="true" signature="2417:5357" ph="..." />
+            <marker date="1503622095000" expanded="true" signature="2422:3245" ph="&quot;&quot;&quot;...&quot;&quot;&quot;" />
+            <marker date="1503622095000" expanded="true" signature="3343:4609" ph="..." />
+            <marker date="1503622095000" expanded="true" signature="3462:3637" ph="..." />
+            <marker date="1503622095000" expanded="true" signature="3674:4609" ph="..." />
+            <marker date="1503622095000" expanded="true" signature="3875:4609" ph="..." />
+            <marker date="1503622095000" expanded="true" signature="4226:4609" ph="..." />
+            <marker date="1503622095000" expanded="true" signature="4336:4609" ph="..." />
+            <marker date="1503622095000" expanded="true" signature="5898:5991" ph="..." />
+            <marker date="1503622095000" expanded="true" signature="7124:7192" ph="..." />
+            <marker date="1503622095000" expanded="true" signature="7649:7903" ph="..." />
           </folding>
         </state>
       </provider>
@@ -707,22 +723,15 @@
     <entry file="file://$PROJECT_DIR$/data/output/output_backup/output_backup_mincorr50/exact_matches.tsv" />
     <entry file="file://$PROJECT_DIR$/scripts/create_all_network.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1065">
-          <caret line="71" column="73" lean-forward="false" selection-start-line="71" selection-start-column="73" selection-end-line="71" selection-end-column="73" />
+        <state relative-caret-position="150">
+          <caret line="10" column="0" lean-forward="true" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
           <folding>
             <element signature="e#469#493#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/create_sens_res_networks.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/create_sens_res_networks.py" />
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="165">
