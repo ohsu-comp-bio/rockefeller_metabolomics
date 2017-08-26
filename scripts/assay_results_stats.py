@@ -200,13 +200,13 @@ def add_ind_ttest_col(assay_results_df):
 
     return assay_results_df
 
-# TODO: Compute a matrix of spearman correlations between all pairs of profiled metabs
+
 # i.e. all 12 malate FCs vs. all 12 aspartate FCs
 # can i do something where it's [6 sens malate vs 6 sens aspartate] vs [6 res malate vs 6 res aspartate]?
-def make_pairwise_metab_spearman_matrix(assay_results_df):
+def make_pairwise_metab_spearman_matrix(assay_results_df, approach='all'):
     """
-    Computes a matrix of spearman correlations between all pairs of profiled metabs
-    Correlates two groups of n=12
+    If approach == all: computes spearman correlations between all pairs of profiled metabs
+    Correlates two groups of n=12. Writes out 2 matrices: spearman's rho and pval
 
     Such that the x axis and y axis share the same labels.
         i.e.
@@ -217,37 +217,93 @@ def make_pairwise_metab_spearman_matrix(assay_results_df):
         ...
         arginine                                            X
 
+    If approach = 'separate': generates 4 matrices. That is, rho and pval matrices are computed
+    separately for sensitive and resistant cell lines.
     """
     # isolate the fold change values
     assay_results_df = assay_results_df.ix[:,:12]
 
-    # initialize empty dataframes
-    corr_df = pd.DataFrame(index = assay_results_df.index,
-                           columns = assay_results_df.index)
-
-    pval_df = pd.DataFrame(index = assay_results_df.index,
-                           columns = assay_results_df.index)
-
     # get an itertools.combinations object of metabolite pairs
     pairs = itertools.combinations(assay_results_df.index, 2)
 
-    for pair in pairs:
-        metab1 = assay_results_df.ix[pair[0]][:12]
-        metab2 = assay_results_df.ix[pair[1]][:12]
+    if approach=='all':
 
-        # calculate spearman's correlation
-        # calculate as though NaNs are not present
-        spearmanr = st.spearmanr(metab1,
-                                 metab2,
-                                 nan_policy='omit')
+        # initialize empty dataframes
+        corr_df = pd.DataFrame(index=assay_results_df.index,
+                               columns=assay_results_df.index)
 
-        corr_df.ix[pair[0], pair[1]] = spearmanr.correlation
-        pval_df.ix[pair[0], pair[1]] = spearmanr.pvalue
+        pval_df = pd.DataFrame(index=assay_results_df.index,
+                               columns=assay_results_df.index)
 
-    corr_df.to_csv(input_data_dir + 'pairwise_spearman_corr_coef.tsv',
-                   sep='\t',
-                   na_rep='NaN')
-    pval_df.to_csv(input_data_dir + 'pairwise_spearman_pval.tsv',
-                   sep='\t',
-                   na_rep='NaN')
+        for pair in pairs:
+            metab1 = assay_results_df.ix[pair[0]][:12]
+            metab2 = assay_results_df.ix[pair[1]][:12]
+
+            # calculate spearman's correlation
+            # calculate as though NaNs are not present
+            spearmanr = st.spearmanr(metab1,
+                                     metab2,
+                                     nan_policy='omit')
+
+            corr_df.ix[pair[0], pair[1]] = spearmanr.correlation
+            pval_df.ix[pair[0], pair[1]] = spearmanr.pvalue
+
+            corr_df.to_csv(input_data_dir + 'pairwise_spearman_corr_coef.tsv',
+                           sep='\t',
+                           na_rep='NaN')
+            pval_df.to_csv(input_data_dir + 'pairwise_spearman_pval.tsv',
+                           sep='\t',
+                           na_rep='NaN')
+
+    if approach=='separate':
+
+        # initialize empty dataframes
+        sens_corr_df = pd.DataFrame(index=assay_results_df.index,
+                               columns=assay_results_df.index)
+
+        sens_pval_df = pd.DataFrame(index=assay_results_df.index,
+                               columns=assay_results_df.index)
+
+        res_corr_df = pd.DataFrame(index=assay_results_df.index,
+                               columns=assay_results_df.index)
+
+        res_pval_df = pd.DataFrame(index=assay_results_df.index,
+                               columns=assay_results_df.index)
+
+        for pair in pairs:
+
+            sens_metab1 = assay_results_df.ix[pair[0]][:6]
+            sens_metab2 = assay_results_df.ix[pair[1]][:6]
+
+            res_metab1 = assay_results_df.ix[pair[0]][6:12]
+            res_metab2 = assay_results_df.ix[pair[1]][6:12]
+
+            sens_spearmanr = st.spearmanr(sens_metab1,
+                                          sens_metab2,
+                                          nan_policy='omit')
+
+            res_spearmanr = st.spearmanr(res_metab1,
+                                         res_metab2,
+                                         nan_policy='omit')
+
+            sens_corr_df.ix[pair[0], pair[1]] = sens_spearmanr.correlation
+            sens_pval_df.ix[pair[0], pair[1]] = sens_spearmanr.pvalue
+
+            res_corr_df.ix[pair[0], pair[1]] = res_spearmanr.correlation
+            res_pval_df.ix[pair[0], pair[1]] = res_spearmanr.pvalue
+
+            sens_corr_df.to_csv(input_data_dir + 'sensitive_pairwise_spearman_corr_coef.tsv',
+                           sep='\t',
+                           na_rep='NaN')
+            sens_pval_df.to_csv(input_data_dir + 'sensitive_pairwise_spearman_pval.tsv',
+                           sep='\t',
+                           na_rep='NaN')
+
+            res_corr_df.to_csv(input_data_dir + 'resistant_pairwise_spearman_corr_coef.tsv',
+                           sep='\t',
+                           na_rep='NaN')
+            res_pval_df.to_csv(input_data_dir + 'resistant_pairwise_spearman_pval.tsv',
+                           sep='\t',
+                           na_rep='NaN')
+
 

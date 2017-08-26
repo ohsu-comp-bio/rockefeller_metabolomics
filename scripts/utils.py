@@ -22,7 +22,6 @@ def get_parts_of_sif_line(line):
     """
     Returns entity1, edge, and entity2 from a .sif relationship
     """
-
     line = line.strip('\n')
     parts = line.split('\t')
     entity1 = parts[0]

@@ -5,6 +5,12 @@ data/input/pairwise_spearman_pval.tsv
 data/input/user_added_chebis_ALL.txt
 data/input/user_added_chebis_SIGNIF_ONLY.txt
 data/input/compounds.tsv
+data/input/all_pairwise_spearman_corr_coef.tsv
+data/input/all_pairwise_spearman_pval.tsv
+data/input/resistant_pairwise_spearman_corr_coef.tsv
+data/input/resistant_pairwise_spearman_pval.tsv
+data/input/sensitive_pairwise_spearman_corr_coef.tsv
+data/input/sensitive_pairwise_spearman_pval.tsv
 data/input/names.tsv
 data/output/*
 scripts/scratch.py

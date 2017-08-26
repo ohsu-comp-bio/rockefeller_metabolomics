@@ -114,3 +114,27 @@ def group_chebis_of_same_parent():
     exact_matches_fh.close()
 
     return metab_dict
+
+
+def append_user_added_chebis_to_map(name_to_chebis_dict, path_to_addl_chebis):
+    """
+    Takes a dictionary with profiled metabolite names as keys (i.e. 'malate', 'aspartate')
+    and lists of derived ChEBI IDs as values (i.e. malate: [CHEBI:1234, CHEBI:4567])
+
+    Adds user-curated ChEBI IDs to the value lists. These are drawn path_to_addl_chebis.
+
+    Returns enhanced dictionary.
+    """
+    # load metadata
+    addl_chebis = path_to_addl_chebis
+    metadata = pd.read_csv(path_to_addl_chebis,
+                           sep='\t',
+                           comment='#',
+                           usecols=[0, 1],
+                           index_col=0)
+
+    # get ChEBI IDs relevant to metab of interest:
+    for name in name_to_chebis_dict:
+        [name_to_chebis_dict[name].append(chebi) for chebi in metadata[metadata['METAB_OF_INTEREST'] == name].index]
+
+    return name_to_chebis_dict

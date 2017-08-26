@@ -10,6 +10,7 @@ Date: August 15, 2017
 from pull_from_metadata import *
 import numpy as np
 import sys
+from utils import *
 
 base_dir = os.path.dirname(os.path.realpath(__file__))
 input_data_dir = base_dir + '/../data/input/'
@@ -17,7 +18,128 @@ metadata_dir = base_dir + '/../metadata/'
 output_data_dir = base_dir + '/../data/output/'
 sys.path += [base_dir + '/../../Rockefeller_Metabolomics']
 
-def specify_chibe_formatting(sig_chebi_ids, sif_path, assay_file):
+
+def specify_named_chibe_formatting_overall(sig_metab_names, sif_path):
+    """
+    Specifically designed for overall. Not appropriate for sensitive or resistant data alone.
+
+    Specify formatting for visualization with Chisio BioPAX Editor (ChiBE)
+    For the sake of clarity: ChiBE != ChEBI
+    Generates a .format file in the same directory as .sif used by ChiBE
+
+    Notes from Ozgun:
+    If ChiBE finds a .format file with the same name at the same directory of the SIF file,
+    it will use that format file to decorate the SIF graph. Colors are given in RGB (red green blue).
+
+    color: The background color of the node
+    textcolor: Color of the node text (name)
+    bordercolor: Border color
+    borderwidth: Width of border, integer unfortunately, default is 1 and 2 is wide enough to stress.
+    tooltip: Sets the text that will show up when the mouse is over the node.
+
+    The .format file is tab delimited text file. Example:
+    node CXCR4 color 23 65 13
+    node RTN4 textcolor 0 0 0
+    node IL6ST bordercolor 180 23 14
+    node CARD9 borderwidth 2
+    node IRS1 tooltip
+
+    """
+
+    format_path = sif_path.replace('sif','format')
+    format_fh = open(format_path, 'w')
+
+    sif_fh = open(sif_path, 'r')
+    sif = sif_fh.readlines()
+
+    # collect a list of all the significant metabolites which are present in the sif
+    present_signif_metabs = []
+    present_metabs = []
+    for relationship in sif:
+        [producer, edge, produced] = get_parts_of_sif_line(relationship)
+        present_metabs.append(producer)
+        present_metabs.append(produced)
+        if producer in sig_metab_names:
+            present_signif_metabs.append(producer)
+        if produced in sig_metab_names:
+            present_signif_metabs.append(produced)
+
+    # de-dupe those lists
+    present_signif_metabs = set(present_signif_metabs)
+    present_metabs = set(present_metabs)
+
+    # color the borders of significantly altered metabs red
+    for name in present_signif_metabs:
+        format_fh.write("node\t" + name + "\tbordercolor\t255 0 0\n")
+        format_fh.write("node\t" + name + "\tborderwidth\t3\n")
+
+    # read in the extended results to get spearman correlation coefficients
+    assay_results = pd.read_csv(input_data_dir + 'assay_results_extended.tsv',
+                                sep='\t',
+                                index_col=0,
+                                header=0,
+                                na_values='nd')
+
+    for name in present_metabs:
+        if name in assay_results.index:
+            fc = assay_results['fc_gmeans'][name]
+            rgb = calculate_node_color_by_fc(fc)
+            rgb_str = "{} {} {}\n".format(rgb[0], rgb[1], rgb[2])
+            format_fh.write("node\t" + name + "\tcolor\t" + rgb_str)
+
+    format_fh.close()
+
+    return format_path
+
+
+def specify_named_chibe_formatting_subset(sif_path, subset):
+    """
+    subset (str): 'sensitive' or 'resistant
+    """
+
+    format_path = sif_path.replace('sif','format')
+    format_fh = open(format_path, 'w')
+
+    sif_fh = open(sif_path, 'r')
+    sif = sif_fh.readlines()
+
+    # color the nodes according to the geometric mean of that group
+    # (NOT FOLD CHANGE OF GEOM MEANS OF 2 GROUPS)
+
+    # read in the extended results to get spearman correlation coefficients
+    assay_results = pd.read_csv(input_data_dir + 'assay_results_extended.tsv',
+                                sep='\t',
+                                index_col=0,
+                                header=0,
+                                na_values='nd')
+    # collect present metabolites
+    present_metabs = []
+    for relationship in sif:
+        [producer, edge, produced] = get_parts_of_sif_line(relationship)
+        present_metabs.append(producer)
+        present_metabs.append(produced)
+
+    present_metabs = set(present_metabs)
+
+    # specify node color
+    for name in present_metabs:
+        if name in assay_results.index:
+            if subset == 'sensitive':
+                gmean = assay_results['sensitive_gmean'][name]
+            if subset == 'resistant':
+                gmean = assay_results['resistant_gmean'][name]
+
+
+            rgb = calculate_node_color_by_gmean(gmean)
+            rgb_str = "{} {} {}\n".format(rgb[0], rgb[1], rgb[2])
+            format_fh.write("node\t" + name + "\tcolor\t" + rgb_str)
+
+    format_fh.close()
+
+    return format_path
+
+
+def specify_chebi_chibe_formatting(sig_chebi_ids, sif_path, assay_file):
     """
     Specify formatting for visualization with Chisio BioPAX Editor (ChiBE)
     For the sake of clarity: ChiBE != ChEBI
@@ -78,10 +200,9 @@ def specify_chibe_formatting(sig_chebi_ids, sif_path, assay_file):
     # get the name to all-IDs dictionary
     name_chebis_map = group_chebis_of_same_parent()
 
-    # TODO: Change to using fold change instead of corr
     for name, chebi_list in name_chebis_map.items():
         fc = assay_results['fc_gmeans'][name]
-        rgb = calculate_node_color(fc)
+        rgb = calculate_node_color_by_fc(fc)
         rgb_str = "{} {} {}\n".format(rgb[0], rgb[1], rgb[2])
         for ch_id in chebi_list:
             format_fh.write("node\t" + ch_id + "\tcolor\t" + rgb_str)
@@ -90,7 +211,8 @@ def specify_chibe_formatting(sig_chebi_ids, sif_path, assay_file):
 
     return format_path
 
-def calculate_node_color(fold_change):
+
+def calculate_node_color_by_fc(fold_change):
     """
     Calculates node color based on fold change.
     Returns node color in RGB format (i.e. np.array([100, 150, 100]))
@@ -128,5 +250,31 @@ def calculate_node_color(fold_change):
 
     if fold_change > 1.0:
         rgb = red
+
+    return rgb
+
+
+def calculate_node_color_by_gmean(gmean):
+    """
+    Appropriate for sensitive or resistant subgroups, but not for overall.
+    Calculates node color based on geometric mean of the group.
+    Returns node color in RGB format (i.e. np.array([100, 150, 100]))
+    Assumes color is RGB between [0, 0, 0] and [255, 255, 255]
+    """
+
+    darkblue = [0, 111, 255]
+
+    white = np.array([255, 255, 255])
+    blue = np.array([71, 151, 255])
+
+    blue_vector = white - blue
+
+    if gmean >= 20.0:
+        rgb = darkblue
+
+    else:
+        percentage = gmean/20.0
+        rgb = blue + blue_vector * (1 - percentage)
+        rgb = [int(i) for i in rgb.tolist()]
 
     return rgb

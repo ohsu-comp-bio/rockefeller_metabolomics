@@ -13,23 +13,44 @@ Date: August 8, 2017
 import libchebipy as lc
 import pandas as pd
 import os
+from utils import *
+import pull_from_metadata
 
-
-def get_metabolites(assay_file, input_data_dir):
+def make_name_chebi_map(assay_df,
+                        input_dir,
+                        metadata_dir):
     """
-    Gets list of metabolites from assay_results.tsv.
-    assay_results.tsv:
-        -matrix with cell lines as cols and metabolites as row names
-        -final column is the p-value resulting from a t-test between
-            sensitive and resistant cell lines
+    Parses assay results dataframe to generate a dictionary with profiled metabolite names
+    as keys. The value for each metabolite name key is a list of ChEBI IDs that were derived
+    from that name (i.e. the exact ChEBI match and any isomers, conjugate acids/bases, etc.)
+
+    Returns this dictionary.
     """
+    # Initialize a dictionary to contain compound names as keys and all derived
+    # ChEBI IDs as values (in a list)
+    name_to_chebis_map = {metab: [] for metab in assay_df.index.tolist()}
 
-    # i.e. 'assay_results.tsv'
-    assay_results_path = input_data_dir + assay_file
-    assay_results = pd.read_csv(assay_results_path, sep='\t', index_col=0, header=0)
-    metabolites = assay_results.index.tolist()
+    # read in the compounds dataframe for mapping names to ChEBI IDs
+    compounds_df = pd.read_csv(input_dir + 'compounds.tsv',
+                               sep='\t',
+                               usecols=[2, 5],
+                               header=0,
+                               index_col=0)
 
-    return metabolites
+    # search for exact matches in compounds.tsv
+    for metab in name_to_chebis_map:
+        exact_chebi_list = compounds_df[compounds_df['NAME'] == metab].index.tolist()
+        if len(exact_chebi_list) > 0:
+            name_to_chebis_map[metab].append(exact_chebi_list[0])
+
+    # set location of data:
+    path_to_addl_chebis = metadata_dir + 'meta_data_user_specified_chebis.txt'
+
+    # add metadata chebis to this map:
+    name_to_chebis_map = pull_from_metadata.append_user_added_chebis_to_map(name_to_chebis_map, path_to_addl_chebis)
+
+    return name_to_chebis_map
+
 
 def get_significant_metab_chebis(assay_file, input_data_dir):
     """
@@ -129,72 +150,75 @@ def map_all_metabs_to_chebi_ids(metabs, signif_no_chebi_ids, output_data_dir):
     return signif_close_matches_path
 
 
-def convert_chebi_sif_to_named_sif(chebi_sif_path, input_data_dir, output_data_dir):
+def convert_chebi_sif_to_named_sif(chebi_sif_path, chebis, name_to_id_map, input_dir):
     """
     Use compounds.tsv to convert ChEBI IDs in a .sif to biochemist-readable names.
     Writes a new file with same name as chebi sif, but replaces "chebi" with "named".
     In the future: make this bidirectional.
     """
 
-    # load compounds.tsv
-    compounds_df = pd.read_csv(input_data_dir + 'compounds.tsv',
-                               sep = '\t',
+    # load the sif that is going to be converted
+    ch_sif_fh = open(chebi_sif_path, 'r')
+    ch_sif = ch_sif_fh.readlines()
+
+    name_sif_path = chebi_sif_path.replace('chebi', 'named')
+    name_sif_fh = open(name_sif_path, 'w')
+
+    # load compounds.tsv to search for names of unprofiled linkers that won't appear in name_to_id_map
+    compounds_df = pd.read_csv(input_dir + 'compounds.tsv',
+                               sep='\t',
+                               usecols=[2, 5],
                                header=0,
-                               index_col=2)
+                               index_col=0)
 
-    # generate a ChEBI-ID-to-name map in the form of a 1-col pd.DataFrame
-    # index = ChEBI IDs
-    id_name_map = compounds_df[['NAME']]
+    # make a list of tuples (A,B) where A and B are names of metabolites
+    named_node_pairs = []
 
-    # load the sif whose members are labeled with ChEBI IDs
-    chebi_sif_fh = open(chebi_sif_path, "r")
-    chebi_sif = chebi_sif_fh.readlines()
+    for relationship in ch_sif:
+        # separate the .sif line into pieces
+        # TODO: for some reason the normal approach isn't working. debug
+        [chebi_a, edge, chebi_b] = get_parts_of_sif_line(relationship)
 
-    name_sif_path = chebi_sif_path.replace('chebi','named')
-    name_sif_fh = open(name_sif_path, "w")
-
-    for line in chebi_sif:
-        line = line.strip('\n')
-        parts = line.split('\t')
-        chebi_a = parts[0]
-        chebi_b = parts[2]
-        edge = parts[1]
-
-        # set default "name" value as chebi ID in case there is no match
+        # preset the names to chebi ids in case there is no name match
         name_a = chebi_a
         name_b = chebi_b
-        if chebi_a in id_name_map.index:
-            name_a = id_name_map.ix[chebi_a,0]
-        elif chebi_a not in id_name_map.index:
-            print("Failed to map " + chebi_a + " to name.")
-        if chebi_b in id_name_map.index:
-            name_b = id_name_map.ix[chebi_b,0]
-        elif chebi_b not in id_name_map.index:
-            print("Failed to map " + chebi_b + " to name.")
 
-        new_line = "{}\t{}\t{}\n".format(name_a, edge, name_b)
+        # search for matches
+        # if chebi_a represents or is derived from a profiled metabolite...
+        if chebi_a in chebis:
+            # find its parent name, if it has one
+            for name, ch_list in name_to_id_map.items():
+                if chebi_a in name_to_id_map[name]:
+                    name_a = name
+
+        # elif it's unprofiled
+        elif chebi_a not in chebis:
+            # it's probably a linker, try to find its name in compounds df
+            if chebi_a in compounds_df.index:
+                name_a = compounds_df.ix[chebi_a].tolist()[0]
+
+        # repeat for chebi_b
+        if chebi_b in chebis:
+            for name, ch_list in name_to_id_map.items():
+                if chebi_b in name_to_id_map[name]:
+                    name_b = name
+        elif chebi_b not in chebis:
+            if chebi_b in compounds_df.index:
+                name_b = compounds_df.ix[chebi_b].tolist()[0]
+
+        named_node_pairs.append((name_a, name_b))
+        # todo: look for duplicates in a second iteration
+
+    # remove duplicates from named_node_pairs
+    deduped_named_node_pairs = set(named_node_pairs)
+
+    for pair in deduped_named_node_pairs:
+        name_a = pair[0]
+        name_b = pair[1]
+        new_line = "{}\t{}\t{}\n".format(name_a, 'used-to-produce' , name_b)
         name_sif_fh.write(new_line)
 
-    chebi_sif_fh.close()
+    ch_sif_fh.close()
     name_sif_fh.close()
 
-    # change format file to reflect IDs
-
-    # if there is a format file
-    if os.path.isfile(chebi_sif_path.replace('.sif','.format')):
-        # set the path to that format file
-        format_filepath = chebi_sif_path.replace('.sif','.format')
-        # load the format file's contents into a dataframe for ease of manipulation
-        format_df = pd.read_csv(format_filepath, sep='\t', header=None)
-        # collect the chebis column
-        format_chebis = pd.Series(format_df.ix[:,1])
-
-        for ch_id in format_chebis:
-            # preset name to the ChEBI ID in case it doesn't map
-            name = ch_id
-            if ch_id in id_name_map.index:
-                name = id_name_map.get_value(ch_id, 'NAME')
-            format_chebis.replace(ch_id, name, inplace=True)
-        format_df[1] = format_chebis
-        format_df.to_csv(name_sif_path.replace('.sif', '.format'),
-                         sep='\t', header=False, index=False)
+    return name_sif_path

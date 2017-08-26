@@ -95,7 +95,7 @@ def main():
 
     # TODO: note that this won't work if the user hasn't already provided a metadata file...
     print("Filtering " + edge + ".sif by ChEBI IDs of interest...")
-    [both_sif_path, either_sif_path, dist_2_path] = filter_sif_by_chebi(edge,
+    [both_sif_path, either_sif_path, dist_2_path] = filter_sif_by_chebi_old(edge,
                                                            path_to_addl_chebis,
                                                            output_data_dir)
 
