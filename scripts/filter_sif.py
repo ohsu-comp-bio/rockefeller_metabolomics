@@ -118,13 +118,14 @@ def filter_sif_by_chebi(chebis, name_ids_dict, min_corr,
 
         sens_drop = filter_by_pairwise_corr([producer, produced],
                                             name_ids_dict,
-                                            sens_corr_matrix,
+                                            all_corr_matrix,
                                             min_corr)
 
         res_drop = filter_by_pairwise_corr([producer, produced],
                                            name_ids_dict,
-                                           res_corr_matrix,
+                                           all_corr_matrix,
                                            min_corr)
+
         # if the overall pair has a decent correlation
         # build BOTH and EITHER networks in one iteration
         if not all_drop:
@@ -225,13 +226,13 @@ def filter_sif_by_chebi(chebis, name_ids_dict, min_corr,
     sens_pup = make_profiled_unprofiled_profiled_dict(sens_produces_linker,
                                                       sens_produced_by_linker,
                                                       name_ids_dict,
-                                                      sens_corr_matrix,
+                                                      all_corr_matrix,
                                                       min_corr)
 
     res_pup = make_profiled_unprofiled_profiled_dict(res_produces_linker,
                                                      res_produced_by_linker,
                                                      name_ids_dict,
-                                                     res_corr_matrix,
+                                                     all_corr_matrix,
                                                      min_corr)
 
     # TODO: make less cryptic

@@ -112,6 +112,10 @@ def specify_named_chibe_formatting_subset(sif_path, subset):
                                 index_col=0,
                                 header=0,
                                 na_values='nd')
+
+    sens_max_amean = np.max(assay_results['sensitive_amean'])
+    res_max_amean = np.max(assay_results['resistant_amean'])
+
     # collect present metabolites
     present_metabs = []
     for relationship in sif:
@@ -125,12 +129,13 @@ def specify_named_chibe_formatting_subset(sif_path, subset):
     for name in present_metabs:
         if name in assay_results.index:
             if subset == 'sensitive':
-                gmean = assay_results['sensitive_gmean'][name]
+                amean = assay_results['sensitive_amean'][name]
+                max_amean = sens_max_amean
             if subset == 'resistant':
-                gmean = assay_results['resistant_gmean'][name]
+                amean = assay_results['resistant_amean'][name]
+                max_amean = res_max_amean
 
-
-            rgb = calculate_node_color_by_gmean(gmean)
+            rgb = calculate_node_color_by_amean(amean, max_amean)
             rgb_str = "{} {} {}\n".format(rgb[0], rgb[1], rgb[2])
             format_fh.write("node\t" + name + "\tcolor\t" + rgb_str)
 
@@ -218,7 +223,7 @@ def calculate_node_color_by_fc(fold_change):
     Returns node color in RGB format (i.e. np.array([100, 150, 100]))
     Assumes color is RGB between [0, 0, 0] and [255, 255, 255]
     """
-
+    # TODO: FIX THIS SINCE FC OF 0-1.0 SHOULD BE A DIFF COLOR THAN 1.0+!!!
     # TODO: Deal with fold changes not being out of 1 or -1...
     gray = [220, 220, 220]
     red = [255, 89, 0]
@@ -255,6 +260,7 @@ def calculate_node_color_by_fc(fold_change):
 
 
 def calculate_node_color_by_gmean(gmean):
+    #TODO: get rid of this function because gmean gives you only positives here. use arith (below)
     """
     Appropriate for sensitive or resistant subgroups, but not for overall.
     Calculates node color based on geometric mean of the group.
@@ -265,16 +271,64 @@ def calculate_node_color_by_gmean(gmean):
     darkblue = [0, 111, 255]
 
     white = np.array([255, 255, 255])
+    gray = [220, 220, 220]
+
     blue = np.array([71, 151, 255])
+    orange = np.array([255, 150, 94])
 
     blue_vector = white - blue
+    orange_vector = white - orange
 
     if gmean >= 20.0:
         rgb = darkblue
 
-    else:
+    if 1.0 < gmean < 20.0:
         percentage = gmean/20.0
         rgb = blue + blue_vector * (1 - percentage)
+        rgb = [int(i) for i in rgb.tolist()]
+
+    if gmean == 1.0:
+        rgb = gray
+
+    if 0.0 <= gmean < 1.0:
+        rgb = orange + orange_vector * (1 - gmean)
+        rgb = [int(i) for i in rgb.tolist()]
+
+    return rgb
+
+
+def calculate_node_color_by_amean(amean, max_amean):
+    """
+    Appropriate for sensitive or resistant subgroups, but not for overall.
+    Calculates node color based on arithmetic mean of the group's fold changes.
+    Returns node color in RGB format (i.e. np.array([100, 150, 100]))
+    Assumes color is RGB between [0, 0, 0] and [255, 255, 255]
+    """
+
+    # darkblue = [0, 111, 255]
+
+    white = np.array([255, 255, 255])
+    gray = [220, 220, 220]
+
+    blue = np.array([71, 151, 255])
+    orange = np.array([255, 150, 94])
+
+    blue_vector = white - blue
+    orange_vector = white - orange
+
+    # if gmean >= 20.0:
+    #     rgb = darkblue
+
+    if 1.0 < amean <= max_amean:
+        percentage = (amean - 1.0)/(max_amean - 1.0)
+        rgb = blue + blue_vector * (1.0 - percentage)
+        rgb = [int(i) for i in rgb.tolist()]
+
+    if amean == 1.0:
+        rgb = gray
+
+    if 0.0 <= amean < 1.0:
+        rgb = orange + orange_vector * amean
         rgb = [int(i) for i in rgb.tolist()]
 
     return rgb

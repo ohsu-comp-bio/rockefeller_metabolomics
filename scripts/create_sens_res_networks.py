@@ -97,26 +97,39 @@ def main():
                                                                         ll,
                                                                         input_dir,
                                                                         output_dir)
-    # TODO: REPEAT THIS FOR BOTH AND EITHER SIFS. BEING LAZY AND ONLY DOING DIST2 SIFS FOR NOW
+    # TODO: REPEAT THIS FOR EITHER SIFS. BEING LAZY AND ONLY DOING DIST2 SIFS FOR NOW
     all_dist2_chebi_location = all_output_locations[2]
     sens_dist2_chebi_location = sens_output_locations[2]
     res_dist2_chebi_location = res_output_locations[2]
+
+    all_both_chebi_location = all_output_locations[0]
+    sens_both_chebi_location = sens_output_locations[0]
+    res_both_chebi_location = res_output_locations[0]
 
     # convert the all chebi sif to the named version
     all_dist2_named_loc = convert_chebi_sif_to_named_sif(all_dist2_chebi_location, chebis, name_to_chebis_map, input_dir)
     sens_dist2_named_loc = convert_chebi_sif_to_named_sif(sens_dist2_chebi_location, chebis, name_to_chebis_map, input_dir)
     res_dist2_named_loc = convert_chebi_sif_to_named_sif(res_dist2_chebi_location, chebis, name_to_chebis_map, input_dir)
 
+    all_both_named_loc = convert_chebi_sif_to_named_sif(all_both_chebi_location, chebis, name_to_chebis_map, input_dir)
+    sens_both_named_loc = convert_chebi_sif_to_named_sif(sens_both_chebi_location, chebis, name_to_chebis_map, input_dir)
+    res_both_named_loc = convert_chebi_sif_to_named_sif(res_both_chebi_location, chebis, name_to_chebis_map, input_dir)
+
     # todo: make sure you repeat this for the non-dist2 ones as well
     # remove weakly correlated from the 'all' one only (because that data's not available in separate approach)
     all_dist2_named_loc = remove_weakly_correlated(all_dist2_named_loc, input_dir)
+    all_both_named_loc = remove_weakly_correlated(all_both_named_loc, input_dir)
 
     # specify formatting for the named all sif
     all_dist2_format_path = specify_named_chibe_formatting_overall(signif_metab_names, all_dist2_named_loc)
+    all_both_format_path = specify_named_chibe_formatting_overall(signif_metab_names, all_both_named_loc)
 
     # a different approach is needed to format the sensitive and resistant sifs
     sens_dist2_format_path = specify_named_chibe_formatting_subset(sens_dist2_named_loc, 'sensitive')
     res_dist2_format_path = specify_named_chibe_formatting_subset(res_dist2_named_loc, 'resistant')
+
+    sens_both_format_path = specify_named_chibe_formatting_subset(sens_both_named_loc, 'sensitive')
+    res_both_format_path = specify_named_chibe_formatting_subset(res_both_named_loc, 'resistant')
 
 
 

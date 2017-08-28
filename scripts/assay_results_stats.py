@@ -98,8 +98,8 @@ def add_geometric_cols(assay_file, input_data_dir):
     # calculate vector of geometric means of each metabolite sens & resis cell lines
     # the values in assay_results are log-transformed (I'm assuming base is e...)
     for metab in assay_results.index:
-        sensitive = assay_results.ix[metab,:6]
-        resistant = assay_results.ix[metab,6:12]
+        resistant = assay_results.ix[metab,:6]
+        sensitive = assay_results.ix[metab,6:12]
         overall = assay_results.ix[metab,:12]
 
         for count, group in enumerate([sensitive, resistant, overall]):
@@ -124,6 +124,37 @@ def add_geometric_cols(assay_file, input_data_dir):
                          #float_format='%.14f',
                          na_rep='NaN')
     return assay_results
+
+
+def add_arith_mean_cols(assay_results_df, input_dir):
+    """
+    Adds an arithmetic mean column for each of the sensitive and resistant subsets.
+    as well as the overall.
+
+    """
+    for metab in assay_results_df.index:
+        resistant = assay_results_df.ix[metab, :6]
+        sensitive = assay_results_df.ix[metab, 6:12]
+        overall = assay_results_df.ix[metab, :12]
+
+        for count, group in enumerate([sensitive, resistant, overall]):
+            arith_mean = np.mean(group)
+            arith_var = np.var(group)
+            if count == 0:
+                assay_results_df.ix[metab, 'sensitive_amean'] = arith_mean
+                assay_results_df.ix[metab, 'sensitive_avar'] = arith_var
+            if count == 1:
+                assay_results_df.ix[metab, 'resistant_amean'] = arith_mean
+                assay_results_df.ix[metab, 'resistant_avar'] = arith_var
+            if count == 2:
+                assay_results_df.ix[metab, 'overall_amean'] = arith_mean
+                assay_results_df.ix[metab, 'overall_avar'] = arith_var
+
+    assay_results_df.to_csv(input_dir + 'assay_results_extended.tsv',
+                         sep='\t',
+                         na_rep='NaN')
+
+    return assay_results_df
 
 
 # TODO: make sense of this output
