@@ -25,14 +25,14 @@ from pull_from_metadata import *
 import os
 
 
-def filter_sif_by_chebi(chebis, name_ids_dict, min_corr,
-                        linker_lenience, input_dir, output_dir):
+def filter_sif_by_chebi(chebis, name_ids_dict, min_corr_both, min_corr_dist2,
+                        linker_lenience, input_dir, output_dir, run_tag):
     """
     Takes a list of all profiled or derived chebis.
 
     Repeats the following process 3 times:
-        once for sensitive cell lines only
         once for resistant cell lines only
+        once for sensitive cell lines only
         once for all cell lines together
 
             Filters input/used-to-produce.sif in order to produce 3 filtered networks:
@@ -54,7 +54,7 @@ def filter_sif_by_chebi(chebis, name_ids_dict, min_corr,
         i.e. 0.7 indicates that A and C in A-->C or in A-->B-->C must be at least
         70% correlated or anticorrelated if A and C are profiled and B is not.
 
-    Returns: output_locations_all, output_locations_sens, output_locations_res
+    Returns: output_locations_all, output_locations_res, output_locations_sens
         where each list of output_locations contains the paths to the
             both, either, and distance of 2 sif networks, respectively
     """
@@ -63,68 +63,71 @@ def filter_sif_by_chebi(chebis, name_ids_dict, min_corr,
     sif = sif_fh.readlines()
 
     # generate names of outfiles
-    all_both_sif = "all_chebi_BOTH_members.sif"
-    all_either_sif = "all_chebi_EITHER_member.sif"
-    all_dist2_sif = "all_chebi_DIST2.sif"
+    all_both_sif = run_tag + "all_chebi_BOTH_members.sif"
+    all_either_sif = run_tag + "all_chebi_EITHER_member.sif"
+    all_dist2_sif = run_tag + "all_chebi_DIST2.sif"
 
-    sens_both_sif = "sens_chebi_BOTH_members.sif"
-    sens_either_sif = "sens_chebi_EITHER_member.sif"
-    sens_dist2_sif = "sens_chebi_DIST2.sif"
+    res_both_sif = run_tag + "res_chebi_BOTH_members.sif"
+    res_either_sif = run_tag + "res_chebi_EITHER_member.sif"
+    res_dist2_sif = run_tag + "res_chebi_DIST2.sif"
 
-    res_both_sif = "res_chebi_BOTH_members.sif"
-    res_either_sif = "res_chebi_EITHER_member.sif"
-    res_dist2_sif = "res_chebi_DIST2.sif"
+    sens_both_sif = run_tag + "sens_chebi_BOTH_members.sif"
+    sens_either_sif = run_tag + "sens_chebi_EITHER_member.sif"
+    sens_dist2_sif = run_tag + "sens_chebi_DIST2.sif"
 
     # open outfiles for writing
     all_both_file = open(output_dir + all_both_sif, "w")
     all_either_file = open(output_dir + all_either_sif, "w")
     all_dist2_file = open(output_dir + all_dist2_sif, "w")
 
-    sens_both_file = open(output_dir + sens_both_sif, "w")
-    sens_either_file = open(output_dir + sens_either_sif, "w")
-    sens_dist2_file = open(output_dir + sens_dist2_sif, "w")
-
     res_both_file = open(output_dir + res_both_sif, "w")
     res_either_file = open(output_dir + res_either_sif, "w")
     res_dist2_file = open(output_dir + res_dist2_sif, "w")
 
+    sens_both_file = open(output_dir + sens_both_sif, "w")
+    sens_either_file = open(output_dir + sens_either_sif, "w")
+    sens_dist2_file = open(output_dir + sens_dist2_sif, "w")
+
     # prepare to collect .sif relationships in which either member is profiled
     all_eithers = []
-    sens_eithers = []
     res_eithers = []
+    sens_eithers = []
+
 
     # read in the metabolite-by-metabolite spearman correlation matrices
     all_corr_matrix = pd.read_csv(input_dir + 'all_pairwise_spearman_corr_coef.tsv',
                                            sep='\t',
                                            index_col=0)
+    '''
+    res_corr_matrix = pd.read_csv(input_dir + 'resistant_pairwise_spearman_corr_coef.tsv',
+                                            sep='\t',
+                                            index_col=0)
 
     sens_corr_matrix = pd.read_csv(input_dir + 'sensitive_pairwise_spearman_corr_coef.tsv',
                                             sep='\t',
                                             index_col=0)
-
-    res_corr_matrix = pd.read_csv(input_dir + 'resistant_pairwise_spearman_corr_coef.tsv',
-                                            sep='\t',
-                                            index_col=0)
+    '''
 
     # begin filtration
     for relationship in sif:
         [producer, edge, produced] = get_parts_of_sif_line(relationship)
 
         # drop a relationship if both members are profiled and the correlation is low
+        # TODO: make it clear that you don't want to use the separate correlation matrices nomo
         all_drop = filter_by_pairwise_corr([producer, produced],
                                            name_ids_dict,
                                            all_corr_matrix,
-                                           min_corr)
-
-        sens_drop = filter_by_pairwise_corr([producer, produced],
-                                            name_ids_dict,
-                                            all_corr_matrix,
-                                            min_corr)
+                                           min_corr_both)
 
         res_drop = filter_by_pairwise_corr([producer, produced],
                                            name_ids_dict,
                                            all_corr_matrix,
-                                           min_corr)
+                                           min_corr_both)
+
+        sens_drop = filter_by_pairwise_corr([producer, produced],
+                                            name_ids_dict,
+                                            all_corr_matrix,
+                                            min_corr_both)
 
         # if the overall pair has a decent correlation
         # build BOTH and EITHER networks in one iteration
@@ -141,19 +144,6 @@ def filter_sif_by_chebi(chebis, name_ids_dict, min_corr,
                 all_both_file.write(relationship)
                 all_dist2_file.write(relationship)
 
-        # repeat for sensitive
-        if not sens_drop:
-            # generate a sif where 1 member match is sufficient:
-            if any(smallmol in chebis for smallmol in [producer, produced]):
-                sens_either_file.write(relationship)
-                sens_eithers.append(relationship)
-
-            # require that both members are present in the matched chebi IDs
-            # write it also to the distance-of-2 network file
-            if all(smallmol in chebis for smallmol in [producer, produced]):
-                sens_both_file.write(relationship)
-                sens_dist2_file.write(relationship)
-
         # repeat for resistant
         if not res_drop:
             # generate a sif where 1 member match is sufficient:
@@ -167,6 +157,19 @@ def filter_sif_by_chebi(chebis, name_ids_dict, min_corr,
                 res_both_file.write(relationship)
                 res_dist2_file.write(relationship)
 
+        # repeat for sensitive
+        if not sens_drop:
+            # generate a sif where 1 member match is sufficient:
+            if any(smallmol in chebis for smallmol in [producer, produced]):
+                sens_either_file.write(relationship)
+                sens_eithers.append(relationship)
+
+            # require that both members are present in the matched chebi IDs
+            # write it also to the distance-of-2 network file
+            if all(smallmol in chebis for smallmol in [producer, produced]):
+                sens_both_file.write(relationship)
+                sens_dist2_file.write(relationship)
+
     # The BOTH and EITHER sifs are now complete (with ChEBI IDs, not names yet)
 
     # close used-to-produce.sif
@@ -174,13 +177,15 @@ def filter_sif_by_chebi(chebis, name_ids_dict, min_corr,
 
     # close the "BOTH.sif" outfiles
     all_both_file.close()
-    sens_both_file.close()
     res_both_file.close()
+    sens_both_file.close()
+
 
     # close the "EITHER.sif" outfiles
     all_either_file.close()
-    sens_either_file.close()
     res_either_file.close()
+    sens_either_file.close()
+
 
     # Now build the remainder of the distance-of-2 networks through further iteration
 
@@ -191,29 +196,29 @@ def filter_sif_by_chebi(chebis, name_ids_dict, min_corr,
      all_unprofiled_produced) = \
         categorize_eithers_metabs(all_eithers, chebis)
 
-    (sens_profiled_producer,
-     sens_profiled_produced,
-     sens_unprofiled_producer,
-     sens_unprofiled_produced) = \
-        categorize_eithers_metabs(sens_eithers, chebis)
-
     (res_profiled_producer,
      res_profiled_produced,
      res_unprofiled_producer,
      res_unprofiled_produced) = \
         categorize_eithers_metabs(res_eithers, chebis)
 
+    (sens_profiled_producer,
+     sens_profiled_produced,
+     sens_unprofiled_producer,
+     sens_unprofiled_produced) = \
+        categorize_eithers_metabs(sens_eithers, chebis)
+
     # identify unprofiled "linkers":
     # capture unprofiled entities which are produced by a profiled entity. Then evaluate
     # whether they also produce a profiled entity.
     all_linkers = find_linkers(all_unprofiled_producer, all_unprofiled_produced)
-    sens_linkers = find_linkers(sens_unprofiled_producer, sens_unprofiled_produced)
     res_linkers = find_linkers(res_unprofiled_producer, res_unprofiled_produced)
+    sens_linkers = find_linkers(sens_unprofiled_producer, sens_unprofiled_produced)
 
     # keep track of who produces whom in linker-involved relationships
     (all_produces_linker, all_produced_by_linker) = who_produces_whom(all_eithers, all_linkers)
-    (sens_produces_linker, sens_produced_by_linker) = who_produces_whom(sens_eithers, sens_linkers)
     (res_produces_linker, res_produced_by_linker) = who_produces_whom(res_eithers, res_linkers)
+    (sens_produces_linker, sens_produced_by_linker) = who_produces_whom(sens_eithers, sens_linkers)
 
     # Make a dictionary where keys are linkers and values are lists of tuples
     # so the relationship ProfiledA --> UnprofiledB --> ProfiledC is represented: pup[B] = [(A,C)]
@@ -221,19 +226,19 @@ def filter_sif_by_chebi(chebis, name_ids_dict, min_corr,
                                                      all_produced_by_linker,
                                                      name_ids_dict,
                                                      all_corr_matrix,
-                                                     min_corr)
-
-    sens_pup = make_profiled_unprofiled_profiled_dict(sens_produces_linker,
-                                                      sens_produced_by_linker,
-                                                      name_ids_dict,
-                                                      all_corr_matrix,
-                                                      min_corr)
+                                                     min_corr_dist2)
 
     res_pup = make_profiled_unprofiled_profiled_dict(res_produces_linker,
                                                      res_produced_by_linker,
                                                      name_ids_dict,
                                                      all_corr_matrix,
-                                                     min_corr)
+                                                     min_corr_dist2)
+
+    sens_pup = make_profiled_unprofiled_profiled_dict(sens_produces_linker,
+                                                      sens_produced_by_linker,
+                                                      name_ids_dict,
+                                                      all_corr_matrix,
+                                                      min_corr_dist2)
 
     # TODO: make less cryptic
     # prepare a first pass for collecting distance-of-2 relationships
@@ -244,30 +249,31 @@ def filter_sif_by_chebi(chebis, name_ids_dict, min_corr,
                                                                     all_profiled_producer,
                                                                     all_profiled_produced)
 
-    (sens_pre_dist2, sens_dict1, sens_dict2) = build_pre_distance_of_2(sens_eithers,
-                                                                       sens_linkers,
-                                                                       sens_profiled_producer,
-                                                                       sens_profiled_produced)
-
     (res_pre_dist2, res_dict1, res_dict2) = build_pre_distance_of_2(res_eithers,
                                                                     res_linkers,
                                                                     res_profiled_producer,
                                                                     res_profiled_produced)
 
+    (sens_pre_dist2, sens_dict1, sens_dict2) = build_pre_distance_of_2(sens_eithers,
+                                                                       sens_linkers,
+                                                                       sens_profiled_producer,
+                                                                       sens_profiled_produced)
+
     # identify cycles wherein one profiled entity is linked to itself by an unprofiled entity
     all_cycles = find_unprofiled_cycles(all_dict1, all_dict2)
-    sens_cycles = find_unprofiled_cycles(sens_dict1, sens_dict2)
     res_cycles = find_unprofiled_cycles(res_dict1, res_dict2)
+    sens_cycles = find_unprofiled_cycles(sens_dict1, sens_dict2)
 
     # remove cycles from pre_dist2 lists
     all_acyclic_pre_dist2 = remove_cycles(all_pre_dist2, all_cycles)
-    sens_acyclic_pre_dist2 = remove_cycles(sens_pre_dist2, sens_cycles)
     res_acyclic_pre_dist2 = remove_cycles(res_pre_dist2, res_cycles)
+    sens_acyclic_pre_dist2 = remove_cycles(sens_pre_dist2, sens_cycles)
+
 
     # a final correlation check is required for distance of two relationships
     all_acyclic_corr_pre_dist2 = pre_dist2_corr_filter(all_acyclic_pre_dist2, all_pup)
-    sens_acyclic_corr_pre_dist2 = pre_dist2_corr_filter(sens_acyclic_pre_dist2, sens_pup)
     res_acyclic_corr_pre_dist2 = pre_dist2_corr_filter(res_acyclic_pre_dist2, res_pup)
+    sens_acyclic_corr_pre_dist2 = pre_dist2_corr_filter(sens_acyclic_pre_dist2, sens_pup)
 
     # go through the pre_dist relationships and only keep the ones whose linkers
     # are "non-ubiquitous" (i.e. appears less than 2 times as a producer and as produced)
@@ -277,10 +283,12 @@ def filter_sif_by_chebi(chebis, name_ids_dict, min_corr,
     # start by sorting
     (all_sorted_producers, all_sorted_produced) = sort_sif_list_by_biggest_producer(all_acyclic_corr_pre_dist2,
                                                                                     all_linkers)
-    (sens_sorted_producers, sens_sorted_produced) = sort_sif_list_by_biggest_producer(sens_acyclic_corr_pre_dist2,
-                                                                                      sens_linkers)
+
     (res_sorted_producers, res_sorted_produced) = sort_sif_list_by_biggest_producer(res_acyclic_corr_pre_dist2,
                                                                                     res_linkers)
+
+    (sens_sorted_producers, sens_sorted_produced) = sort_sif_list_by_biggest_producer(sens_acyclic_corr_pre_dist2,
+                                                                                      sens_linkers)
 
     # i've decided to exclude sif relationships in which the linker
     # takes part as either a producer or produced entity in more than the number of
@@ -289,34 +297,34 @@ def filter_sif_by_chebi(chebis, name_ids_dict, min_corr,
     all_ok_unprofiled_producers = all_sorted_producers[all_sorted_producers[1] < linker_lenience].index
     all_ok_unprofiled_produced = all_sorted_produced[all_sorted_produced[1] < linker_lenience].index
 
-    sens_ok_unprofiled_producers = sens_sorted_producers[sens_sorted_producers[1] < linker_lenience].index
-    sens_ok_unprofiled_produced = sens_sorted_produced[sens_sorted_produced[1] < linker_lenience].index
-
     res_ok_unprofiled_producers = res_sorted_producers[res_sorted_producers[1] < linker_lenience].index
     res_ok_unprofiled_produced = res_sorted_produced[res_sorted_produced[1] < linker_lenience].index
 
+    sens_ok_unprofiled_producers = sens_sorted_producers[sens_sorted_producers[1] < linker_lenience].index
+    sens_ok_unprofiled_produced = sens_sorted_produced[sens_sorted_produced[1] < linker_lenience].index
+
     # get the union of the two lists (for each type in all, sens, and res). Proceed only with those.
     all_ok_unprofiled = all_ok_unprofiled_producers & all_ok_unprofiled_produced
-    sens_ok_unprofiled = sens_ok_unprofiled_producers & sens_ok_unprofiled_produced
     res_ok_unprofiled = res_ok_unprofiled_producers & res_ok_unprofiled_produced
+    sens_ok_unprofiled = sens_ok_unprofiled_producers & sens_ok_unprofiled_produced
 
     # only include relationships from either where the unprofiled entity isn't too promiscuous
     # write those to file
     write_dist2_out(all_dist2_file, all_acyclic_corr_pre_dist2, all_ok_unprofiled, chebis)
-    write_dist2_out(sens_dist2_file, sens_acyclic_corr_pre_dist2, sens_ok_unprofiled, chebis)
     write_dist2_out(res_dist2_file, res_acyclic_corr_pre_dist2, res_ok_unprofiled, chebis)
+    write_dist2_out(sens_dist2_file, sens_acyclic_corr_pre_dist2, sens_ok_unprofiled, chebis)
 
     all_dist2_file.close()
-    sens_dist2_file.close()
     res_dist2_file.close()
+    sens_dist2_file.close()
 
     output_locations_all = [output_dir + all_both_sif, output_dir + all_either_sif, output_dir + all_dist2_sif]
-    output_locations_sens = [output_dir + sens_both_sif, output_dir + sens_either_sif, output_dir + sens_dist2_sif]
     output_locations_res = [output_dir + res_both_sif, output_dir + res_either_sif, output_dir + res_dist2_sif]
+    output_locations_sens = [output_dir + sens_both_sif, output_dir + sens_either_sif, output_dir + sens_dist2_sif]
 
-    return output_locations_all, output_locations_sens, output_locations_res
+    return output_locations_all, output_locations_res, output_locations_sens
 
-
+# TODO: DESTROY THIS? AT LEAST CHECK SENSITIVE VS. RESISTANT
 def filter_sif_by_chebi_old(edge, path_to_addl_chebis, output_data_dir):
     """
     Uses ChEBI IDs (from exact-matches and from a user-added file containing
@@ -1028,6 +1036,20 @@ def remove_weakly_correlated(all_sif_path, input_dir):
     return out_sif_path
 
 
+def remove_insignif_metabs(named_sif_path, signif_metabs, input_dir):
+    """
+    Removes all metabolites whose p_value between resistant and sensitive is
+    deemed to be insignificant (as set by user)
+    """
+    sif_fh = open(named_sif_path, 'r')
+    sif = sif_fh.readlines()
+
+    for relationship in sif:
+        [producer, edge, produced] = get_parts_of_sif_line(relationship)
+
+
+
+    return sif_fh
 
 
 

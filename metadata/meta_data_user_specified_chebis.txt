@@ -6,7 +6,7 @@
 # Significant small molecules that are excluded from network:
 #	Na_acetylglutamine (alias N-alpha-acetylglutamine (urinary metabolite)) has no exact ChEBI matches.
 #	Na_acetylglutamine aliases and similar structures do not appear in used-to-produce.sif (73685, 21553)
-#	UDP-hexose had no exact matches and no aliases or similar structures in ChEBI
+#	UDP-hexose had no exact matches and no aliases or similar structures in ChEBI, manually adding all UDP-hexoses
 #
 # Insignificant small molecules that are excluded from network:
 #   hydroxyproline
@@ -139,3 +139,9 @@ CHEBI:17115	serine	L-serine	NO	Isomer of serine (17822).
 CHEBI:44897	phosphoenolpyruvate	phosphoenolpyruvic acid	NO	Conjugate acid of phosphoenolpyruvate (18021).
 CHEBI:15816	arginine	D-arginine	NO	Isomer of arginine (29016).
 CHEBI:16467	arginine	L-arginine	NO	Isomer of arginine (29016).
+CHEBI:18066	UDP-hexose	UDP-D-glucose	YES	Isomer of UDP-glucose, which is a UDP-hexose.
+CHEBI:58367	UDP-hexose	UDP-D-glucose(2-)	YES	Isomer of UDP-glucose, which is a UDP-hexose.
+CHEBI:46229	UDP-hexose	UDP-a-D-glucose	YES	Isomer of UDP-glucose, which is a UDP-hexose.
+CHEBI:67119	UDP-hexose	UDP-a-D-galactose	YES	Isomer of UDP-galactose, which is a UDP-hexose.
+CHEBI:18307	UDP-hexose	UDP-D-galactose	YES	Isomer of UDP-galactose, which is a UDP-hexose.
+

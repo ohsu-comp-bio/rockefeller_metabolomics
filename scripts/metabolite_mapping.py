@@ -16,7 +16,7 @@ import os
 from utils import *
 import pull_from_metadata
 
-def make_name_chebi_map(assay_df,
+def make_name_chebi_map(signif_metabs,
                         input_dir,
                         metadata_dir):
     """
@@ -26,9 +26,12 @@ def make_name_chebi_map(assay_df,
 
     Returns this dictionary.
     """
+
+    #TODO: don't include any in this map that are not significant?
     # Initialize a dictionary to contain compound names as keys and all derived
     # ChEBI IDs as values (in a list)
-    name_to_chebis_map = {metab: [] for metab in assay_df.index.tolist()}
+    name_to_chebis_map = {metab: [] for metab in signif_metabs}
+    # name_to_chebis_map = {metab: [] for metab in assay_df.index.tolist()}
 
     # read in the compounds dataframe for mapping names to ChEBI IDs
     compounds_df = pd.read_csv(input_dir + 'compounds.tsv',

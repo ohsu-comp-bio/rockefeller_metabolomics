@@ -113,8 +113,15 @@ def specify_named_chibe_formatting_subset(sif_path, subset):
                                 header=0,
                                 na_values='nd')
 
+    max_amean = np.max([np.max(assay_results['resistant_amean']), np.max(assay_results['sensitive_amean'])])
+    min_amean = np.max([np.min(assay_results['resistant_amean']), np.min(assay_results['sensitive_amean'])])
+
+    """
     sens_max_amean = np.max(assay_results['sensitive_amean'])
     res_max_amean = np.max(assay_results['resistant_amean'])
+    sens_min_amean =
+    res_min_amean =
+    """
 
     # collect present metabolites
     present_metabs = []
@@ -128,14 +135,15 @@ def specify_named_chibe_formatting_subset(sif_path, subset):
     # specify node color
     for name in present_metabs:
         if name in assay_results.index:
-            if subset == 'sensitive':
-                amean = assay_results['sensitive_amean'][name]
-                max_amean = sens_max_amean
             if subset == 'resistant':
                 amean = assay_results['resistant_amean'][name]
-                max_amean = res_max_amean
+                # max_amean = res_max_amean
+            if subset == 'sensitive':
+                amean = assay_results['sensitive_amean'][name]
+                # max_amean = sens_max_amean
 
-            rgb = calculate_node_color_by_amean(amean, max_amean)
+            # note that this is the amean of the fcs (therefore, it is the gmean of the log'd fcs)
+            rgb = calculate_node_color_by_amean(amean, max_amean, min_amean)
             rgb_str = "{} {} {}\n".format(rgb[0], rgb[1], rgb[2])
             format_fh.write("node\t" + name + "\tcolor\t" + rgb_str)
 
@@ -297,7 +305,7 @@ def calculate_node_color_by_gmean(gmean):
     return rgb
 
 
-def calculate_node_color_by_amean(amean, max_amean):
+def calculate_node_color_by_amean(amean, max_amean, min_amean):
     """
     Appropriate for sensitive or resistant subgroups, but not for overall.
     Calculates node color based on arithmetic mean of the group's fold changes.
@@ -321,14 +329,14 @@ def calculate_node_color_by_amean(amean, max_amean):
 
     if 1.0 < amean <= max_amean:
         percentage = (amean - 1.0)/(max_amean - 1.0)
-        rgb = blue + blue_vector * (1.0 - percentage)
+        rgb = orange + orange_vector * (1.0 - percentage)
         rgb = [int(i) for i in rgb.tolist()]
 
     if amean == 1.0:
         rgb = gray
 
     if 0.0 <= amean < 1.0:
-        rgb = orange + orange_vector * amean
+        rgb = blue + blue_vector * (1 - min_amean/amean)
         rgb = [int(i) for i in rgb.tolist()]
 
     return rgb

@@ -102,17 +102,17 @@ def add_geometric_cols(assay_file, input_data_dir):
         sensitive = assay_results.ix[metab,6:12]
         overall = assay_results.ix[metab,:12]
 
-        for count, group in enumerate([sensitive, resistant, overall]):
+        for count, group in enumerate([resistant, sensitive, overall]):
             arith_mean = np.mean(group)
             arith_var = np.var(group)
             geom_mean = math.e**arith_mean
             geom_var = math.e**arith_var
             if count == 0:
-                assay_results.ix[metab, 'sensitive_gmean'] = geom_mean
-                assay_results.ix[metab, 'sensitive_gvar'] = geom_var
-            if count == 1:
                 assay_results.ix[metab, 'resistant_gmean'] = geom_mean
                 assay_results.ix[metab, 'resistant_gvar'] = geom_var
+            if count == 1:
+                assay_results.ix[metab, 'sensitive_gmean'] = geom_mean
+                assay_results.ix[metab, 'sensitive_gvar'] = geom_var
             if count == 2:
                 assay_results.ix[metab, 'overall_gmean'] = geom_mean
                 assay_results.ix[metab, 'overall_gvar'] = geom_var
@@ -137,15 +137,15 @@ def add_arith_mean_cols(assay_results_df, input_dir):
         sensitive = assay_results_df.ix[metab, 6:12]
         overall = assay_results_df.ix[metab, :12]
 
-        for count, group in enumerate([sensitive, resistant, overall]):
+        for count, group in enumerate([resistant, sensitive, overall]):
             arith_mean = np.mean(group)
             arith_var = np.var(group)
             if count == 0:
-                assay_results_df.ix[metab, 'sensitive_amean'] = arith_mean
-                assay_results_df.ix[metab, 'sensitive_avar'] = arith_var
-            if count == 1:
                 assay_results_df.ix[metab, 'resistant_amean'] = arith_mean
                 assay_results_df.ix[metab, 'resistant_avar'] = arith_var
+            if count == 1:
+                assay_results_df.ix[metab, 'sensitive_amean'] = arith_mean
+                assay_results_df.ix[metab, 'sensitive_avar'] = arith_var
             if count == 2:
                 assay_results_df.ix[metab, 'overall_amean'] = arith_mean
                 assay_results_df.ix[metab, 'overall_avar'] = arith_var
@@ -157,7 +157,7 @@ def add_arith_mean_cols(assay_results_df, input_dir):
     return assay_results_df
 
 
-# TODO: make sense of this output
+# TODO: kill this. it doesn't make a lick of sense.
 def add_spearmans_corr_col(assay_results_df):
     """
     Takes assay_results pd.DataFrame and calculates the Spearman's rank correlation
@@ -172,12 +172,12 @@ def add_spearmans_corr_col(assay_results_df):
 
     # calculate spearman's correlation
     for metab in assay_results_df.index:
-        sensitive = assay_results_df.ix[metab][:6]
-        resistant = assay_results_df.ix[metab][6:12]
+        resistant = assay_results_df.ix[metab][:6]
+        sensitive = assay_results_df.ix[metab][6:12]
         # calculate spearman's correlation
         # calculate as though NaNs are not present
-        spearmanr = st.spearmanr(sensitive,
-                                 resistant,
+        spearmanr = st.spearmanr(resistant,
+                                 sensitive,
                                  nan_policy='omit')
         sp_corr.append(spearmanr.correlation)
         sp_pval.append(spearmanr.pvalue)
@@ -209,6 +209,24 @@ def add_fc_between_geom_means(assay_results_df):
 
     return assay_results_df
 
+
+def add_fc_between_arith_means(assay_results_df):
+    """
+    Calculates the fold change between the geometric means of the sensitive
+    and resistant cell lines for each metabolite. Adds this column to the df.
+    Writes out and returns the new dataframe.
+
+    If sens gmean = 0.5 and res gmean = 1.0, FC = 1.0
+    if sens gmean = 1.0 and res gmean = 0.5, FC = -0.5
+    """
+    assay_results_df['fc_ameans'] = assay_results_df['resistant_amean']/assay_results_df['sensitive_amean'] - 1
+    assay_results_df.to_csv(input_data_dir + 'assay_results_extended.tsv',
+                         sep='\t',
+                         na_rep='NaN')
+
+    return assay_results_df
+
+
 def add_ind_ttest_col(assay_results_df):
     """
     Seeing if I can replicate their ttest results.
@@ -217,17 +235,40 @@ def add_ind_ttest_col(assay_results_df):
     ttest_statistic = []
     ttest_pval = []
     for metab in assay_results_df.index:
-        sensitive = assay_results_df.ix[metab][:6]
-        resistant = assay_results_df.ix[metab][6:12]
-        ttest = st.ttest_ind(sensitive,
-                             resistant)
-        #                     nan_policy='omit')
+        resistant = assay_results_df.ix[metab][:6]
+        sensitive = assay_results_df.ix[metab][6:12]
+        ttest = st.ttest_ind(resistant,
+                             sensitive,
+                             nan_policy='omit')
         # omitting the nans breaks it...
         ttest_statistic.append(ttest.statistic)
         ttest_pval.append(ttest.pvalue)
 
     assay_results_df['T_stat'] = ttest_statistic
     assay_results_df['ttest_pval'] = ttest_pval
+
+    return assay_results_df
+
+
+def add_mann_whitney_u_col(assay_results_df):
+    """
+    Add a Mann Whitney U column
+    """
+
+    mwu_statistic = []
+    mwu_pval = []
+    for metab in assay_results_df.index:
+        resistant = assay_results_df.ix[metab][:6]
+        sensitive = assay_results_df.ix[metab][6:12]
+        mwu = st.mannwhitneyu(resistant,
+                             sensitive)
+        #                     nan_policy='omit')
+        # omitting the nans breaks it...
+        mwu_statistic.append(mwu.statistic)
+        mwu_pval.append(mwu.pvalue)
+
+    assay_results_df['MWU_stat'] = mwu_statistic
+    assay_results_df['MWU_pval'] = mwu_pval
 
     return assay_results_df
 
@@ -289,46 +330,39 @@ def make_pairwise_metab_spearman_matrix(assay_results_df, approach='all'):
     if approach=='separate':
 
         # initialize empty dataframes
-        sens_corr_df = pd.DataFrame(index=assay_results_df.index,
-                               columns=assay_results_df.index)
-
-        sens_pval_df = pd.DataFrame(index=assay_results_df.index,
-                               columns=assay_results_df.index)
-
         res_corr_df = pd.DataFrame(index=assay_results_df.index,
                                columns=assay_results_df.index)
 
         res_pval_df = pd.DataFrame(index=assay_results_df.index,
                                columns=assay_results_df.index)
 
+        sens_corr_df = pd.DataFrame(index=assay_results_df.index,
+                               columns=assay_results_df.index)
+
+        sens_pval_df = pd.DataFrame(index=assay_results_df.index,
+                               columns=assay_results_df.index)
+
         for pair in pairs:
 
-            sens_metab1 = assay_results_df.ix[pair[0]][:6]
-            sens_metab2 = assay_results_df.ix[pair[1]][:6]
+            res_metab1 = assay_results_df.ix[pair[0]][:6]
+            res_metab2 = assay_results_df.ix[pair[1]][:6]
 
-            res_metab1 = assay_results_df.ix[pair[0]][6:12]
-            res_metab2 = assay_results_df.ix[pair[1]][6:12]
-
-            sens_spearmanr = st.spearmanr(sens_metab1,
-                                          sens_metab2,
-                                          nan_policy='omit')
+            sens_metab1 = assay_results_df.ix[pair[0]][6:12]
+            sens_metab2 = assay_results_df.ix[pair[1]][6:12]
 
             res_spearmanr = st.spearmanr(res_metab1,
-                                         res_metab2,
-                                         nan_policy='omit')
+                                          res_metab2,
+                                          nan_policy='omit')
 
-            sens_corr_df.ix[pair[0], pair[1]] = sens_spearmanr.correlation
-            sens_pval_df.ix[pair[0], pair[1]] = sens_spearmanr.pvalue
+            sens_spearmanr = st.spearmanr(sens_metab1,
+                                         sens_metab2,
+                                         nan_policy='omit')
 
             res_corr_df.ix[pair[0], pair[1]] = res_spearmanr.correlation
             res_pval_df.ix[pair[0], pair[1]] = res_spearmanr.pvalue
 
-            sens_corr_df.to_csv(input_data_dir + 'sensitive_pairwise_spearman_corr_coef.tsv',
-                           sep='\t',
-                           na_rep='NaN')
-            sens_pval_df.to_csv(input_data_dir + 'sensitive_pairwise_spearman_pval.tsv',
-                           sep='\t',
-                           na_rep='NaN')
+            sens_corr_df.ix[pair[0], pair[1]] = sens_spearmanr.correlation
+            sens_pval_df.ix[pair[0], pair[1]] = sens_spearmanr.pvalue
 
             res_corr_df.to_csv(input_data_dir + 'resistant_pairwise_spearman_corr_coef.tsv',
                            sep='\t',
@@ -337,4 +371,28 @@ def make_pairwise_metab_spearman_matrix(assay_results_df, approach='all'):
                            sep='\t',
                            na_rep='NaN')
 
+            sens_corr_df.to_csv(input_data_dir + 'sensitive_pairwise_spearman_corr_coef.tsv',
+                           sep='\t',
+                           na_rep='NaN')
+            sens_pval_df.to_csv(input_data_dir + 'sensitive_pairwise_spearman_pval.tsv',
+                           sep='\t',
+                           na_rep='NaN')
 
+
+def ln_assay_results(assay_file, input_dir):
+    """
+    Produces an output file which contains natural log values of all original assay results
+    Returns the log'd data frame
+    """
+    assay_results_path = input_dir + assay_file
+    assay_results = pd.read_csv(assay_results_path,
+                                sep='\t',
+                                index_col=0,
+                                header=0,
+                                na_values = 'nd')
+    log_fcs = np.log(assay_results.ix[:,:12])
+    log_fcs.to_csv(input_dir + 'assay_results_log.tsv',
+                   sep='\t',
+                   na_rep='NaN')
+
+    return log_fcs

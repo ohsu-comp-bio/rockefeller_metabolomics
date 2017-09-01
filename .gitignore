@@ -1,5 +1,8 @@
 data/input/assay_results.tsv
 data/input/assay_results_extended.tsv
+data/input/old_assay_results_extended.tsv
+data/input/assay_results_log.tsv
+data/input/input_backup/
 data/input/pairwise_spearman_corr_coef.tsv
 data/input/pairwise_spearman_pval.tsv
 data/input/user_added_chebis_ALL.txt
@@ -13,6 +16,9 @@ data/input/sensitive_pairwise_spearman_corr_coef.tsv
 data/input/sensitive_pairwise_spearman_pval.tsv
 data/input/names.tsv
 data/output/*
+data/plots/*
 scripts/scratch.py
 *.pyc
 .idea/*
+.DS_Store
+*.DS_Store*

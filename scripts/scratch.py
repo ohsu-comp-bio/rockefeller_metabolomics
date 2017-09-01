@@ -1,64 +1,126 @@
-# TODO: Verify the log base used to generate these values
-# TODO: What to do with the geometric mean?
-# TODO: include in create_network?
-def add_geometric_cols(assay_file, input_data_dir):
+def generate_drug_mut_assoc_bp(auc_df, anova_df, clf_type, plots_dir, id, run):
     """
-    Calculates 6 vectors:
-        geometric means of sensitive cell line metabolite abundance changes
-        geometric means of resistant cell line metabolite abundance changes
-        geometric means of all cell line metabolite abundance changes
-        geometric variance of sensitive cell line metabolite abundance changes
-        geometric variance of resistant cell line metabolite abundance changes
-        geometric variance of all cell line metabolite abundance changes
-
-    Geometric mean: the anti-log of the arithmetic mean of log-transformed values.
-    Geometric variance: the anti-log of the arithmetic variance of log-transformed values.
-
-    Generates assay_results_extended.tsv
-    Returns assay results in the form of pd.DataFrame (including geom. means)
+    Generates a figure with 1 boxplot per high-quality classifier.
+    Data points for each boxplot are drug-mutation associations from auc_df.
+    They are colored according to whether their are expected to be
+    positively correlated (blue), negatively correlated (green),
+    or not correlated (black) as per the ANOVA scores in anova_df.
+    auc_df and anova_df should bear the same shape:
+        cols = mutations
+        rows = drugs
     """
 
-    # NOTE: see https://github.com/pandas-dev/pandas/issues/16452
-    # In assay_results.tsv, the floats are rounded to 14 digits after the decimal.
-    # However this is not how they are stored in memory, so pandas loads the "true"
-    # value. I could restrict the number of decimals that are loaded here but that
-    # doesn't change how many are actually used in calculations.
-    # I've chosen to restrict the decimals only at the point of writing it to file.
-    assay_results_path = input_data_dir + assay_file
-    assay_results = pd.read_csv(assay_results_path,
-                                sep='\t',
-                                index_col=0,
-                                header=0,
-                                na_values = 'nd')
-    assay_results.rename(columns={'Unnamed: 13': 'ttest_p'},
-                         inplace=True)
+    # get the sign ("direction") of the ANOVA score in iorio_assoc
+    # this will be used to determine the color of datapoints in boxplots
+    assoc_directions = {drug: {'pos_anova': [], 'neg_anova': []} for drug in anova_df.columns}
+    for drug in anova_df.columns:
+        row_indexer = 0
+        for anova_score in anova_df[drug]:
+            if anova_score < 0:
+                mut = anova_df.index[row_indexer]
+                assoc_directions[drug]['neg_anova'].append(mut)
+            if anova_score > 0:
+                mut = anova_df.index[row_indexer]
+                assoc_directions[drug]['pos_anova'].append(mut)
+            row_indexer += 1
 
-    # calculate vector of geometric means of each metabolite sens & resis cell lines
-    # the values in assay_results are log-transformed (I'm assuming base is e...)
-    for metab in assay_results.index:
-        sensitive = assay_results.ix[metab,:6]
-        resistant = assay_results.ix[metab,6:12]
-        overall = assay_results.ix[metab,:12]
+    # generate boxplots of tcga_auc
+    fig = plt.figure(figsize=(14, 8))
+    bp = auc_df.boxplot(showfliers=False)
+    ax = fig.add_subplot(111)
+    ax.grid(False)
+    axes = plt.gca()
+    plt.title(clf_type + "classifier behavior")
+    plt.ylabel("AUC")
+    plt.xlabel("Drug Classifier")
+    colcount = 0
+    for drug in auc_df.columns:
+        colcount += 1
 
-        for count, group in enumerate([sensitive, resistant, overall]):
-            arith_mean = np.mean(group)
-            arith_var = np.var(group)
-            geom_mean = math.e**arith_mean
-            geom_var = math.e**arith_var
-            if count == 0:
-                assay_results.ix[metab, 'sensitive_gmean'] = geom_mean
-                assay_results.ix[metab, 'sensitive_gvar'] = geom_var
-            if count == 1:
-                assay_results.ix[metab, 'resistant_gmean'] = geom_mean
-                assay_results.ix[metab, 'resistant_gvar'] = geom_var
-            if count == 2:
-                assay_results.ix[metab, 'overall_gmean'] = geom_mean
-                assay_results.ix[metab, 'overall_gvar'] = geom_var
+        # lists muts
+        pos_anova_muts = assoc_directions[drug]['pos_anova']  # color these blue
+        neg_anova_muts = assoc_directions[drug]['neg_anova']  # color these red
+        zero_anova_muts = auc_df[drug].index.drop(pos_anova_muts).drop(neg_anova_muts)
 
-    # TODO: Determine how to not have it replace digits after the 14th decimal point with zeros
-    # note that setting float_format='%.14f' causes sum(), np.sum(), etc. to output "inf" :|
-    assay_results.to_csv(assay_results_path.replace('.tsv','_extended.tsv'),
-                         sep='\t',
-                         #float_format='%.14f',
-                         na_rep='NaN')
-    return assay_results
+        # get the drug column (type is pd.Series)
+        aucs = auc_df[drug]
+
+        # generate series for different data colors (auc values)
+        blue_points = aucs[pos_anova_muts]
+        red_points = aucs[neg_anova_muts]
+        black_points = aucs[zero_anova_muts]
+        colors = itertools.cycle(["r.", "k.", "b."])
+        point_size = itertools.cycle([9.0, 3.0, 9.0])
+
+        for colorgroup in [red_points, black_points, blue_points]:
+            # prepare to add jitter
+            x = np.random.normal(colcount, 0.08, len(colorgroup))
+            plt.plot(x, colorgroup, next(colors), alpha=0.6, markersize=next(point_size))
+        plt.xticks(rotation='45')
+
+    plt.axhline(y=0.50, c="0.75")
+    axes.set_ylim([0.0, 1.0])
+    axes.set_yticks(np.arange(0, 1.1, 0.1))
+    plt.tight_layout()
+    # plt.show(block=False)
+    # plt.waitforbuttonpress(0)
+    # print("Press any button to close the plots and proceed.")
+    plt.savefig(plots_dir + clf_type + '/' + run + '/'
+                + id + '_' + clf_type + '_' + run + '_behavior_boxplots.png')
+    plt.close(fig)
+
+
+def generate_ccle_resp_bp(pred_ccle_resp, patient_resp, clf_type, plots_dir, id, run):
+    """
+    Generates boxplots of (1) predicted and (2) actual cell line responses
+    to each drug. Draws a line representative of the predicted patient/sample
+    response for comparison.
+    pred_ccle_resp (dict):
+        key (str): drug name (only those for well behaved classifiers)
+        value (pd.Series): vector of cell line predicted responses to drug-key
+    patient_resp (pd.Series):
+        key (str): drug name
+        value (float): predicted patient response to drug-key
+    clf_type (str):
+        i.e. 'ElasticNet', 'rForest', or 'SVRrbf'
+    prefix (str):
+        user-specified prefix for output plot file names
+    """
+
+    # load CCLE response data relevant to the well-behaving drug classifiers
+    actual_ccle_resp = get_drug_ioria(pred_ccle_resp.keys())
+
+    # for each drug make a separate boxplot
+    for drug in pred_ccle_resp.keys():
+        # TODO: make a line for patient response
+
+        # make a little pandas dataframe
+        # TODO: refactor this. i rushed and i'm sure there's a better way.
+        single_drug_df = pd.DataFrame({'Measured': actual_ccle_resp[drug].values})
+        single_drug_df['Predicted'] = pd.Series(pred_ccle_resp[drug].values)
+
+        fig = plt.figure(figsize=(8, 8))
+        bp = single_drug_df.boxplot(showfliers=False, vert=False)
+        ax = fig.add_subplot(111)
+        ax.grid(False)
+        axes = plt.gca()
+        plt.title(drug + " responses: actual and predicted by the " + clf_type + " classifier")
+        plt.xlabel("AUC")
+
+        # add the points with jitter
+        colcount = 0
+        for colname in single_drug_df:
+            colcount += 1
+            y = np.random.normal(colcount, 0.08, single_drug_df.shape[0])
+            plt.plot(single_drug_df[colname], y, "c.", alpha=0.2)
+
+        plt.axvline(x=0.50, c="0.75")
+        axes.set_xlim([0.0, 1.1])
+        axes.set_xticks(np.arange(0, 1.1, 0.1))
+        plt.tight_layout()
+
+        plt.savefig(plots_dir + clf_type + '/' + run + '/'
+            + id + '_' + clf_type + '_' + drug.replace('/', '__').replace(' ', '_')
+            + '_' + run + '_ccle_response_bp.png'
+            )
+        plt.close(fig)
