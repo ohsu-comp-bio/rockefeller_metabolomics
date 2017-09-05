@@ -113,6 +113,7 @@ def specify_named_chibe_formatting_subset(sif_path, subset):
                                 header=0,
                                 na_values='nd')
 
+    # prepare to normalize the color range by min and max means
     max_amean = np.max([np.max(assay_results['resistant_amean']), np.max(assay_results['sensitive_amean'])])
     min_amean = np.max([np.min(assay_results['resistant_amean']), np.min(assay_results['sensitive_amean'])])
 

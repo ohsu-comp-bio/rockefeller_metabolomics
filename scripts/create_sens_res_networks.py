@@ -21,8 +21,8 @@ from pull_from_metadata import *
 from utils import *
 
 import pandas as pd
-import numpy as np
 import argparse
+import glob
 import sys
 import os
 
@@ -168,6 +168,10 @@ def main():
 
     res_both_format_path = specify_named_chibe_formatting_subset(res_both_named_loc, 'resistant')
     sens_both_format_path = specify_named_chibe_formatting_subset(sens_both_named_loc, 'sensitive')
+
+    # remove the chebi sifs
+    for filename in glob.glob(output_dir + "*chebi*"):
+        os.remove(filename)
 
 if __name__ == '__main__':
     main()
