@@ -12,7 +12,6 @@ Date: August 8, 2017
 
 import libchebipy as lc
 import pandas as pd
-import os
 from utils import *
 import pull_from_metadata
 
@@ -164,7 +163,7 @@ def convert_chebi_sif_to_named_sif(chebi_sif_path, chebis, name_to_id_map, input
     ch_sif_fh = open(chebi_sif_path, 'r')
     ch_sif = ch_sif_fh.readlines()
 
-    name_sif_path = chebi_sif_path.replace('chebi', 'named')
+    name_sif_path = chebi_sif_path.replace('chebi_', '')
     name_sif_fh = open(name_sif_path, 'w')
 
     # load compounds.tsv to search for names of unprofiled linkers that won't appear in name_to_id_map

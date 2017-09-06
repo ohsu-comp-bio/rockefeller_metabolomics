@@ -7,6 +7,7 @@ Date: August 21, 2017
 
 from metabolite_mapping import *
 import sys
+import os
 
 base_dir = os.path.dirname(os.path.realpath(__file__))
 input_data_dir = base_dir + '/../data/input/'

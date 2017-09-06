@@ -1,5 +1,5 @@
 """
-Functions to generate .format files for .sif networks to be visualized in ChiBE.
+Functions for generating .format files for .sif networks to be visualized in ChiBE.
 
 A useful tool for picking complementary colors: https://www.sessions.edu/color-calculator/
 
@@ -82,14 +82,12 @@ def specify_named_chibe_formatting_overall(sig_metab_names, sif_path):
 
     for name in present_metabs:
         if name in assay_results.index:
-            fc = assay_results['fc_gmeans'][name]
+            fc = assay_results['fc_ameans'][name]
             rgb = calculate_node_color_by_fc(fc)
             rgb_str = "{} {} {}\n".format(rgb[0], rgb[1], rgb[2])
             format_fh.write("node\t" + name + "\tcolor\t" + rgb_str)
 
     format_fh.close()
-
-    return format_path
 
 
 def specify_named_chibe_formatting_subset(sif_path, subset):
@@ -117,13 +115,6 @@ def specify_named_chibe_formatting_subset(sif_path, subset):
     max_amean = np.max([np.max(assay_results['resistant_amean']), np.max(assay_results['sensitive_amean'])])
     min_amean = np.max([np.min(assay_results['resistant_amean']), np.min(assay_results['sensitive_amean'])])
 
-    """
-    sens_max_amean = np.max(assay_results['sensitive_amean'])
-    res_max_amean = np.max(assay_results['resistant_amean'])
-    sens_min_amean =
-    res_min_amean =
-    """
-
     # collect present metabolites
     present_metabs = []
     for relationship in sif:
@@ -149,8 +140,6 @@ def specify_named_chibe_formatting_subset(sif_path, subset):
             format_fh.write("node\t" + name + "\tcolor\t" + rgb_str)
 
     format_fh.close()
-
-    return format_path
 
 
 def specify_chebi_chibe_formatting(sig_chebi_ids, sif_path, assay_file):
@@ -215,7 +204,7 @@ def specify_chebi_chibe_formatting(sig_chebi_ids, sif_path, assay_file):
     name_chebis_map = group_chebis_of_same_parent()
 
     for name, chebi_list in name_chebis_map.items():
-        fc = assay_results['fc_gmeans'][name]
+        fc = assay_results['fc_ameans'][name]
         rgb = calculate_node_color_by_fc(fc)
         rgb_str = "{} {} {}\n".format(rgb[0], rgb[1], rgb[2])
         for ch_id in chebi_list:
